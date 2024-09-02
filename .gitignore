@@ -1,3 +1,5 @@
 node_modules/
 backgrounds/
 background_changer.pid
+.DS_Store
+.env

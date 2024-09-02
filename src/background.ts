@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import { exec } from 'child_process';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import sharp from 'sharp';
+import { exiftool } from 'exiftool-vendored';
 
 dotenv.config();
 
@@ -44,7 +46,24 @@ async function generateImage(prompt: string): Promise<Buffer | null> {
     return Buffer.from(arrayBuffer);
 }
 
-function saveImage(imageData: Buffer): string {
+function cleanUpOldImages() {
+    const files = fs.readdirSync(BACKGROUND_DIR);
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+    files.forEach(file => {
+        const filePath = path.join(BACKGROUND_DIR, file);
+        const stats = fs.statSync(filePath);
+        const fileAge = now - stats.mtimeMs;
+
+        if (fileAge > twentyFourHours) {
+            fs.unlinkSync(filePath);
+            console.log(`Deleted old image file: ${filePath}`);
+        }
+    });
+}
+
+async function saveImageWithMetadata(imageData: Buffer, prompt: string): Promise<string> {
     const existingFiles = fs.readdirSync(BACKGROUND_DIR);
     const lastNumber = existingFiles
         .map(file => {
@@ -55,8 +74,16 @@ function saveImage(imageData: Buffer): string {
 
     const newFileName = `bg${lastNumber + 1}.jpg`;
     const filePath = path.join(BACKGROUND_DIR, newFileName);
-    fs.writeFileSync(filePath, imageData);
-    console.log(`File saved: ${filePath}`);
+
+    await sharp(imageData).toFile(filePath);
+
+    // Add the prompt as metadata using exiftool
+    await exiftool.write(filePath, {
+        Comment: prompt,
+        'Caption-Abstract': prompt,
+    }, {writeArgs:['-overwrite_original'] });
+
+    console.log(`File saved with metadata: ${filePath}`);
     return filePath;
 }
 
@@ -93,28 +120,34 @@ function setDesktopBackground(imagePath: string): void {
     // });
 }
 
+async function ServiceLoop(){
+    const prompt = getRandomPrompt();
+    console.log(`Using prompt: ${prompt}`);
+
+    const imageData = await generateImage(prompt);
+    if (imageData) {
+        // Clean up old images after saving a new one
+        cleanUpOldImages();
+
+        const imagePath = await saveImageWithMetadata(imageData, prompt);
+        setDesktopBackground(imagePath);
+    } else {
+        console.error("Failed to generate or set the desktop background.");
+    }
+}
+
 export function startService(): void {
     if (intervalId) {
         console.log("Service already running.");
         return;
     }
 
-    intervalId = setInterval(async () => {
-        const prompt = getRandomPrompt();
-        console.log(`Using prompt: ${prompt}`);
-
-        
-        const imageData = await generateImage(prompt);
-        if (imageData) {
-            const imagePath = saveImage(imageData);
-            setDesktopBackground(imagePath);
-        } else {
-            console.error("Failed to generate or set the desktop background.");
-        }
-    }, INTERVAL_IN_MS); // Change every hour
+    intervalId = setInterval(ServiceLoop, INTERVAL_IN_MS); // Change every hour
 
     fs.writeFileSync(PID_FILE, process.pid.toString());
     console.log("Service started.");
+
+    ServiceLoop();
 }
 
 export function stopService(): void {

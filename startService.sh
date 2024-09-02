@@ -1,0 +1,1 @@
+pm2 start "npm run service start" --name "Background Changer"

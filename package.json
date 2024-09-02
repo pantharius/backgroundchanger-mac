@@ -10,11 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.5",
+    "exiftool-vendored": "^28.2.1",
     "jsonfile": "^6.1.0",
     "log4js": "^6.7.1",
+    "sharp": "^0.33.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "dotenv": "^16.4.5"
+    "typescript": "^5.4.5"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
