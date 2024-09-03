@@ -7,7 +7,7 @@ import { exiftool } from 'exiftool-vendored';
 
 dotenv.config();
 
-const INTERVAL_IN_MS = +(process.env.INTERVAL_IN_S??60)*1000;
+const INTERVAL_IN_MS = +(process.env.INTERVAL_IN_S??3600)*1000;
 const API_KEY = process.env.HF_API_KEY;
 const API_URL = 'https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell';
 const PROMPTS_FILE = path.join(__dirname, '../prompts.txt');
@@ -47,20 +47,37 @@ async function generateImage(prompt: string): Promise<Buffer | null> {
 }
 
 function cleanUpOldImages() {
-    const files = fs.readdirSync(BACKGROUND_DIR);
-    const now = Date.now();
-    const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    const files = fs.readdirSync(BACKGROUND_DIR).map(file => ({
+        name: file,
+        path: path.join(BACKGROUND_DIR, file),
+        stats: fs.statSync(path.join(BACKGROUND_DIR, file)),
+    }));
 
-    files.forEach(file => {
-        const filePath = path.join(BACKGROUND_DIR, file);
-        const stats = fs.statSync(filePath);
-        const fileAge = now - stats.mtimeMs;
+    // Calculate total size of files in bytes
+    const totalSize = files.reduce((acc, file) => acc + file.stats.size, 0);
+    const fourGB = 4 * 1024 * 1024 * 1024; // 4 GB in bytes
+    const twoGB = 2 * 1024 * 1024 * 1024;  // 2 GB in bytes
 
-        if (fileAge > twentyFourHours) {
-            fs.unlinkSync(filePath);
-            console.log(`Deleted old image file: ${filePath}`);
+    // If total size is greater than 4 GB, start deleting oldest files
+    if (totalSize > fourGB) {
+        console.log("Total size exceeds 4GB. Starting cleanup...");
+
+        // Sort files by modification time, oldest first
+        files.sort((a, b) => a.stats.mtimeMs - b.stats.mtimeMs);
+
+        let currentSize = totalSize;
+
+        for (const file of files) {
+            if (currentSize <= twoGB) {
+                break; // Stop if size is reduced to 2 GB or less
+            }
+            fs.unlinkSync(file.path);
+            currentSize -= file.stats.size;
+            console.log(`Deleted file: ${file.path}`);
         }
-    });
+
+        console.log(`Cleanup complete. Current directory size: ${(currentSize / (1024 * 1024)).toFixed(2)} MB`);
+    }
 }
 
 async function saveImageWithMetadata(imageData: Buffer, prompt: string): Promise<string> {
@@ -79,8 +96,7 @@ async function saveImageWithMetadata(imageData: Buffer, prompt: string): Promise
 
     // Add the prompt as metadata using exiftool
     await exiftool.write(filePath, {
-        Comment: prompt,
-        'Caption-Abstract': prompt,
+        Comment: prompt
     }, {writeArgs:['-overwrite_original'] });
 
     console.log(`File saved with metadata: ${filePath}`);
@@ -120,20 +136,43 @@ function setDesktopBackground(imagePath: string): void {
     // });
 }
 
+async function isDuplicate(prompt: string): Promise<string|null> {
+    const files = fs.readdirSync(BACKGROUND_DIR);
+
+    for (const file of files) {
+        const filePath = path.join(BACKGROUND_DIR, file);
+        const metadata = await exiftool.read(filePath);
+        if (metadata.Comment === prompt) {
+            return filePath;
+        }
+    }
+    return null;
+}
+
 async function ServiceLoop(){
     const prompt = getRandomPrompt();
     console.log(`Using prompt: ${prompt}`);
-
-    const imageData = await generateImage(prompt);
-    if (imageData) {
+    const cache = await isDuplicate(prompt);
+    if(cache === null){
+        const imageData = await generateImage(prompt);
+        if (imageData) {
+            // Clean up old images after saving a new one
+            cleanUpOldImages();
+    
+            const imagePath = await saveImageWithMetadata(imageData, prompt);
+            setDesktopBackground(imagePath);
+        } else {
+            console.error("Failed to generate or set the desktop background.");
+        }
+    }else{
+        console.log("Duplicate prompt detected. Loading cache");
         // Clean up old images after saving a new one
         cleanUpOldImages();
 
-        const imagePath = await saveImageWithMetadata(imageData, prompt);
-        setDesktopBackground(imagePath);
-    } else {
-        console.error("Failed to generate or set the desktop background.");
+        setDesktopBackground(cache);
     }
+    
+    
 }
 
 export function startService(): void {
