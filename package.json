@@ -1,14 +1,13 @@
 {
-  "name": "backgroundchanger",
-  "version": "1.0.0",
-  "description": "",
+  "name": "bgchanger",
+  "version": "0.1.0",
+  "description": "Example menubar electron app",
   "main": "main.ts",
+  "private": true,
   "scripts": {
-    "service": "ts-node main.ts",
-    "test": "jest"
+    "build": "tsc",
+    "start": "npm run build && electron dist/main.js"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
     "exiftool-vendored": "^28.2.1",
@@ -16,7 +15,9 @@
     "log4js": "^6.7.1",
     "sharp": "^0.33.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "electron": "^31.0.2",
+    "menubar": "^9.5.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
