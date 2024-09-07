@@ -82,7 +82,5 @@ app.on("ready", () => {
 });
 // Prevent the app from quitting when all windows are closed
 app.on('window-all-closed', (event:any) => {
-  if (process.platform !== 'darwin') {  // For Windows/Linux, allow the app to quit
-    app.quit();
-  }
+  console.log("preventing closing app");
 });

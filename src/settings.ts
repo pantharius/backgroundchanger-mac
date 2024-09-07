@@ -64,11 +64,19 @@ export function OpenPromptsTxt() {
   const promptsFilePath = path.join(__dirname, "..", "prompts.txt");
   console.log(promptsFilePath);
   if (fs.existsSync(promptsFilePath)) {
-    exec(`open ${promptsFilePath}`, (error) => {
-      if (error) {
-        console.error("Failed to open prompts.txt:", error);
-      }
-    });
+    if (process.platform === 'win32') {
+      exec(`${promptsFilePath}`, (error) => {
+        if (error) {
+          console.error("Failed to open prompts.txt:", error);
+        }
+      });
+    }else{
+      exec(`open ${promptsFilePath}`, (error) => {
+        if (error) {
+          console.error("Failed to open prompts.txt:", error);
+        }
+      });
+    }
   } else {
     console.error("prompts.txt does not exist.");
   }

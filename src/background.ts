@@ -127,8 +127,39 @@ async function saveImageWithMetadata(
   console.log(`File saved with metadata: ${filePath}`);
   return filePath;
 }
+async function setDesktopBackground(imagePath: string) {
+  if (process.platform === 'win32') {
+    await setDesktopBackgroundWindows(imagePath);
+  }else{
+    await setDesktopBackgroundMacOs(imagePath);
+  }
+}
 
-async function setDesktopBackground(imagePath: string): Promise<void> {
+async function setDesktopBackgroundWindows(imagePath:string) {
+  try {
+    const resolvedImagePath = path.resolve(imagePath);
+
+    // Update the wallpaper path in the Windows registry
+    exec(`reg add "HKCU\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "${resolvedImagePath}" /f`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error setting registry wallpaper: ${error.message}`);
+        return;
+      }
+
+      // Force the system to refresh the wallpaper
+      exec('RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters', (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error refreshing desktop: ${error.message}`);
+          return;
+        }
+        console.log('Desktop background set successfully on Windows');
+      });
+    });
+  } catch (error:any) {
+    console.error(`Error setting desktop background: ${error.message}`);
+  }
+}
+async function setDesktopBackgroundMacOs(imagePath: string): Promise<void> {
   // Ensure that the path format is correct for AppleScript
   const script = `
         tell application "System Events"
