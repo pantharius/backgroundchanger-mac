@@ -6,6 +6,8 @@ import sharp from "sharp";
 import { exiftool } from "exiftool-vendored";
 import { Notification } from "electron";
 import { buildMenu } from "./main";
+import cron from "node-cron";
+import cronstrue from "cronstrue";
 
 dotenv.config();
 
@@ -14,17 +16,15 @@ export function showNotification(title: string, body: string) {
   new Notification({ title, body }).show();
 }
 
-export const INTERVAL_IN_MS = +(process.env.INTERVAL_IN_S ?? 3600) * 1000;
-const API_KEY = process.env.HF_API_KEY;
-const API_URL =
-  "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell";
+const MODEL = "models/black-forest-labs/FLUX.1-schnell";
+const API_URL = "https://api-inference.huggingface.co/" + MODEL;
 const PROMPTS_FILE = path.join(__dirname, "../prompts.txt");
 const PID_FILE = path.join(__dirname, "../background_changer.pid");
-const BACKGROUND_DIR =
+
+let currentTask: cron.ScheduledTask | null = null;
+
+let BACKGROUND_DIR =
   process.env.BACKGROUND_DIR ?? path.join(__dirname, "../backgrounds");
-
-let intervalId: NodeJS.Timeout | null = null;
-
 // Ensure the backgrounds directory exists
 if (!fs.existsSync(BACKGROUND_DIR)) {
   fs.mkdirSync(BACKGROUND_DIR);
@@ -40,7 +40,7 @@ async function generateImage(prompt: string): Promise<Buffer | null> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${API_KEY}`,
+      Authorization: `Bearer ${process.env.HF_API_KEY}`,
     },
     body: JSON.stringify({ inputs: prompt }),
   });
@@ -56,6 +56,8 @@ async function generateImage(prompt: string): Promise<Buffer | null> {
 }
 
 function cleanUpOldImages() {
+  let BACKGROUND_DIR =
+    process.env.BACKGROUND_DIR ?? path.join(__dirname, "../backgrounds");
   const files = fs.readdirSync(BACKGROUND_DIR).map((file) => ({
     name: file,
     path: path.join(BACKGROUND_DIR, file),
@@ -98,6 +100,8 @@ async function saveImageWithMetadata(
   imageData: Buffer,
   prompt: string
 ): Promise<string> {
+  let BACKGROUND_DIR =
+    process.env.BACKGROUND_DIR ?? path.join(__dirname, "../backgrounds");
   const existingFiles = fs.readdirSync(BACKGROUND_DIR);
   const lastNumber = existingFiles
     .map((file) => {
@@ -161,6 +165,8 @@ async function setDesktopBackground(imagePath: string): Promise<void> {
 }
 
 async function isDuplicate(prompt: string): Promise<string | null> {
+  let BACKGROUND_DIR =
+    process.env.BACKGROUND_DIR ?? path.join(__dirname, "../backgrounds");
   const files = fs.readdirSync(BACKGROUND_DIR);
 
   for (const file of files) {
@@ -185,7 +191,6 @@ async function ServiceLoop() {
 
       const imagePath = await saveImageWithMetadata(imageData, prompt);
       await setDesktopBackground(imagePath);
-
       showNotification("Background changed", `Prompt: "${prompt}"`);
     } else {
       showNotification(
@@ -199,32 +204,39 @@ async function ServiceLoop() {
     cleanUpOldImages();
 
     await setDesktopBackground(cache);
+    showNotification("Background changed [from cache]", `Prompt: "${prompt}"`);
   }
 }
 
 export function startService(): void {
-  if (intervalId) {
-    console.log("Service already running.");
-    return;
+  // Stop any existing task if it's running
+  if (currentTask) {
+    currentTask.stop();
   }
 
-  intervalId = setInterval(ServiceLoop, INTERVAL_IN_MS); // Change every hour
+  let CRON_EXPRESSION = process.env.CRON_EXPRESSION ?? "0 * * * *";
+
+  currentTask = cron.schedule(CRON_EXPRESSION, () => {
+    ServiceLoop();
+  });
+
+  currentTask.start();
 
   buildMenu();
 
   fs.writeFileSync(PID_FILE, process.pid.toString());
   showNotification(
     "Service started.",
-    `Your background will change every ${INTERVAL_IN_MS / 1000} seconds.`
+    `Your background will change ${cronstrue.toString(CRON_EXPRESSION)}.`
   );
 
   ServiceLoop();
 }
 
 export function stopService(): void {
-  if (intervalId) {
-    clearInterval(intervalId);
-    intervalId = null;
+  if (currentTask) {
+    currentTask.stop();
+    currentTask = null;
     if (fs.existsSync(PID_FILE)) fs.unlinkSync(PID_FILE);
     showNotification("Service stopped.", "We already miss you.");
     buildMenu();
@@ -234,5 +246,5 @@ export function stopService(): void {
 }
 
 export function serviceStatus(): boolean {
-  return !!intervalId;
+  return !!currentTask;
 }

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Cron Schedule</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    input {
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h3>Update Schedule (cron syntax)</h3>
+  <input type="text" id="cronInput" placeholder="e.g. * * * * *" required />
+  <button id="submitCron">Submit</button>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    document.getElementById('submitCron').addEventListener('click', () => {
+      const cronExpression = document.getElementById('cronInput').value;
+      ipcRenderer.send('new-cron-expression', cronExpression);
+      window.close();  // Close the window after submission
+    });
+  </script>
+</body>
+</html>

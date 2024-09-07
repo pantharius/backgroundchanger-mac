@@ -7,22 +7,51 @@ import {
   startService,
   stopService,
 } from "./background";
+import { ChangeBackgroundDirectory, configureHFKey, OpenPromptsTxt, updateCronExpression } from "./settings";
 
 // Path to your tray icon
 const iconPath = path.join(__dirname, "..", "IconTemplate.png");
 let tray: Tray;
 
 export const buildMenu = () => {
+
+  const isStartServiceEnabled = !!process.env.HF_API_KEY && !serviceStatus()
+  const isStopServiceEnabled =  !!process.env.HF_API_KEY && serviceStatus();
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Start Service",
       click: () => startService(),
-      enabled: !serviceStatus(),
+      enabled: isStartServiceEnabled,
+      toolTip: isStartServiceEnabled?"":(!process.env.HF_API_KEY ? "HFKey Needed" : "Service already started.")
     },
     {
       label: "Stop Service",
       click: () => stopService(),
-      enabled: serviceStatus(),
+      enabled: !!process.env.HF_API_KEY && serviceStatus(),
+      toolTip: isStopServiceEnabled?"":(!process.env.HF_API_KEY ? "HFKey Needed" : "Service already stopped.")
+    },
+    { type: "separator" },
+    {
+      type:"submenu",
+      label:"Paramètres",
+      submenu:[
+        {
+          label: "Update cron expression",
+          click: () => updateCronExpression(),
+        },
+        {
+          label: "Configure HF Key",
+          click: () => configureHFKey(),
+        },
+        {
+          label: "Change background directory",
+          click: () => ChangeBackgroundDirectory(),
+        },
+      ]
+    },
+    {
+      label: "Open prompts.txt",
+      click: () => OpenPromptsTxt(),
     },
     { type: "separator" },
     {
@@ -50,4 +79,10 @@ app.on("ready", () => {
       `I'm up to change when you want to !`
     );
   });
+});
+// Prevent the app from quitting when all windows are closed
+app.on('window-all-closed', (event:any) => {
+  if (process.platform !== 'darwin') {  // For Windows/Linux, allow the app to quit
+    app.quit();
+  }
 });
