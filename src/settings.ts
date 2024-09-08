@@ -3,61 +3,45 @@ import { BrowserWindow, dialog, ipcMain } from "electron";
 import path from "path";
 import fs from "fs";
 import { startService } from "./background";
+import storage from 'node-persist';
 
-let inputWindow = null;
+let inputWindow: BrowserWindow | null = null;
 
-export function updateCronExpression() {
+
+export function updateSettings() {
   inputWindow = new BrowserWindow({
-    width: 300,
-    height: 150,
-    frame: false,  // No window frame
-    resizable: false,
+    width: 500,
+    height: 400,
     webPreferences: {
-      nodeIntegration: true,  // Allow use of Node.js in the window
-      contextIsolation: false
-    }
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
   });
 
-  // Load the number input HTML file
-  inputWindow.loadFile(path.join(__dirname, "..", "html", "cronexpression.html"));
+  inputWindow.loadFile(path.join(__dirname, "..", "html", "settings.html"));
+  // Send the default values to the renderer process
+  inputWindow?.webContents.on('did-finish-load', async () => {
+    inputWindow?.webContents.send('default-settings', JSON.stringify({
+      CRON_EXPRESSION: await storage.get('CRON_EXPRESSION'),
+      HF_API_KEY: await storage.get('HF_API_KEY'),
+      BACKGROUND_DIR: await storage.get('BACKGROUND_DIR')??path.join(__dirname, "../backgrounds"),
+      MODEL: await storage.get('MODEL'),
+    }));
+  });
 
   inputWindow.on('closed', () => {
     inputWindow = null;
   });
 }
+ipcMain.on('save-settings', async (event, settings) => {
+  await storage.set("CRON_EXPRESSION",settings.CRON_EXPRESSION);
+  await storage.set("HF_API_KEY",settings.HF_API_KEY);
+  await storage.set("BACKGROUND_DIR",settings.BACKGROUND_DIR);
+  await storage.set("MODEL",settings.MODEL);
 
-// Handle cron input from the renderer process
-ipcMain.on('new-cron-expression', (event, cronExpression) => {
-  console.log(`New cron expression received: ${cronExpression}`);
-  updateEnvVariable("CRON_EXPRESSION", cronExpression);
+  console.log('Settings saved:', settings);
+
   startService();
-  console.log('Task scheduled successfully');
-});
-
-export function configureHFKey() {
-  inputWindow = new BrowserWindow({
-    width: 300,
-    height: 150,
-    frame: false,  // No window frame
-    resizable: false,
-    webPreferences: {
-      nodeIntegration: true,  // Allow use of Node.js in the window
-      contextIsolation: false
-    }
-  });
-
-  // Load the number input HTML file
-  inputWindow.loadFile(path.join(__dirname, "..", "html", "configureHFKey.html"));
-
-  inputWindow.on('closed', () => {
-    inputWindow = null;
-  });
-}
-ipcMain.on('configure-hf-api-key', (event, apiKey) => {
-  console.log(`Hugging Face API Key received: ${apiKey}`);
-  updateEnvVariable("HF_API_KEY", apiKey);
-  startService();
-  console.log('Task scheduled successfully');
 });
 
 export function OpenPromptsTxt() {
@@ -80,48 +64,4 @@ export function OpenPromptsTxt() {
   } else {
     console.error("prompts.txt does not exist.");
   }
-}
-
-export function ChangeBackgroundDirectory() {
-  const selectedDir = dialog.showOpenDialogSync({
-    properties: ["openDirectory"],
-    message: "Select a new background directory",
-    defaultPath: process.env.BACKGROUND_DIR,
-  });
-
-  if (selectedDir && selectedDir.length > 0) {
-    const newDir = selectedDir[0];
-    updateEnvVariable("BACKGROUND_DIR", newDir);
-  }
-}
-
-const envFilePath = path.join(__dirname, "..", ".env");
-
-function updateEnvVariable(key: string, value: string) {
-  // Read the .env file
-  let envVariables = fs.readFileSync(envFilePath, "utf8").split("\n");
-
-  // Check if the key exists and update its value
-  let found = false;
-  envVariables = envVariables.map((line) => {
-    if (line.startsWith(`${key}=`)) {
-      found = true;
-      return `${key}=${value}`;
-    }
-    return line;
-  });
-
-  // If the key was not found, add it to the end of the file
-  if (!found) {
-    envVariables.push(`${key}=${value}`);
-  }
-
-  // Write the updated content back to the .env file
-  fs.writeFileSync(envFilePath, envVariables.join("\n"), "utf8");
-
-  // Update process.env with the new value
-  process.env[key] = value;
-  console.log(JSON.stringify(process.env))
-
-  console.log(`${key} has been updated to ${value}`);
 }

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <h3>Configure Your Settings</h3>
+
+  <!-- Cron Expression -->
+  <label for="CRON_EXPRESSION">Cron Expression</label>
+  <input type="text" id="CRON_EXPRESSION" placeholder="e.g., * * * * *" />
+
+  <!-- Hugging Face API Key -->
+  <label for="HF_API_KEY">Hugging Face API Key</label>
+  <input type="text" id="HF_API_KEY" placeholder="Enter your HF API Key" />
+
+  <!-- Background Directory -->
+  <label for="BACKGROUND_DIR">Background Directory</label>
+  <input type="text" id="BACKGROUND_DIR" placeholder="Choose directory" />
+
+  <!-- Algorithm Model -->
+  <label for="MODEL">Select Algorithm Model</label>
+  <select id="MODEL">
+    <option value="model1">Model 1</option>
+    <option value="model2">Model 2</option>
+  </select>
+
+  <!-- Save Button -->
+  <button id="saveButton">Save</button>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    // Listen for default settings from the main process
+    ipcRenderer.on('default-settings', (event, settings) => {
+      settings = JSON.parse(settings);
+      document.getElementById('CRON_EXPRESSION').value = settings.CRON_EXPRESSION;
+      document.getElementById('HF_API_KEY').value = settings.HF_API_KEY;
+      document.getElementById('BACKGROUND_DIR').value = settings.BACKGROUND_DIR;
+      document.getElementById('MODEL').value = settings.MODEL;
+    });
+
+    document.getElementById('saveButton').addEventListener('click', () => {
+      const CRON_EXPRESSION = document.getElementById('CRON_EXPRESSION').value;
+      const HF_API_KEY = document.getElementById('HF_API_KEY').value;
+      const BACKGROUND_DIR = document.getElementById('BACKGROUND_DIR').value;
+      const MODEL = document.getElementById('MODEL').value;
+
+      // Send data to the main process
+      ipcRenderer.send('save-settings', {
+        CRON_EXPRESSION,
+        HF_API_KEY,
+        BACKGROUND_DIR,
+        MODEL,
+      });
+
+      alert('Settings saved!');
+    });
+  </script>
+</body>
+</html>

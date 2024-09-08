@@ -8,13 +8,9 @@ import { Notification } from "electron";
 import { buildMenu } from "./main";
 import cron from "node-cron";
 import cronstrue from "cronstrue";
+import storage from 'node-persist';
 
 dotenv.config();
-
-// Show notification
-export function showNotification(title: string, body: string) {
-  new Notification({ title, body }).show();
-}
 
 const MODEL = "models/black-forest-labs/FLUX.1-schnell";
 const API_URL = "https://api-inference.huggingface.co/" + MODEL;
@@ -23,11 +19,13 @@ const PID_FILE = path.join(__dirname, "../background_changer.pid");
 
 let currentTask: cron.ScheduledTask | null = null;
 
-let BACKGROUND_DIR =
-  process.env.BACKGROUND_DIR ?? path.join(__dirname, "../backgrounds");
-// Ensure the backgrounds directory exists
-if (!fs.existsSync(BACKGROUND_DIR)) {
-  fs.mkdirSync(BACKGROUND_DIR);
+export async function createIfNotExistsBackgroundDir(){
+  let bgdir = await storage.get('BACKGROUND_DIR');
+  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
+  // Ensure the backgrounds directory exists
+  if (!fs.existsSync(BACKGROUND_DIR)) {
+    fs.mkdirSync(BACKGROUND_DIR);
+  }
 }
 
 function getRandomPrompt(): string {
@@ -36,11 +34,12 @@ function getRandomPrompt(): string {
 }
 
 async function generateImage(prompt: string): Promise<Buffer | null> {
+  const hfApiKey = await storage.get('HF_API_KEY');
   const response = await fetch(API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.HF_API_KEY}`,
+      Authorization: `Bearer ${hfApiKey}`,
     },
     body: JSON.stringify({ inputs: prompt }),
   });
@@ -55,9 +54,9 @@ async function generateImage(prompt: string): Promise<Buffer | null> {
   return Buffer.from(arrayBuffer);
 }
 
-function cleanUpOldImages() {
-  let BACKGROUND_DIR =
-    process.env.BACKGROUND_DIR ?? path.join(__dirname, "../backgrounds");
+async function cleanUpOldImages() {
+  let bgdir = await storage.get('BACKGROUND_DIR');
+  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
   const files = fs.readdirSync(BACKGROUND_DIR).map((file) => ({
     name: file,
     path: path.join(BACKGROUND_DIR, file),
@@ -100,8 +99,8 @@ async function saveImageWithMetadata(
   imageData: Buffer,
   prompt: string
 ): Promise<string> {
-  let BACKGROUND_DIR =
-    process.env.BACKGROUND_DIR ?? path.join(__dirname, "../backgrounds");
+  let bgdir = await storage.get('BACKGROUND_DIR');
+  let BACKGROUND_DIR =bgdir?? path.join(__dirname, "../backgrounds");
   const existingFiles = fs.readdirSync(BACKGROUND_DIR);
   const lastNumber = existingFiles
     .map((file) => {
@@ -196,8 +195,8 @@ async function setDesktopBackgroundMacOs(imagePath: string): Promise<void> {
 }
 
 async function isDuplicate(prompt: string): Promise<string | null> {
-  let BACKGROUND_DIR =
-    process.env.BACKGROUND_DIR ?? path.join(__dirname, "../backgrounds");
+  let bgdir = await storage.get('BACKGROUND_DIR');
+  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
   const files = fs.readdirSync(BACKGROUND_DIR);
 
   for (const file of files) {
@@ -218,7 +217,7 @@ async function ServiceLoop() {
     const imageData = await generateImage(prompt);
     if (imageData) {
       // Clean up old images after saving a new one
-      cleanUpOldImages();
+      await cleanUpOldImages();
 
       const imagePath = await saveImageWithMetadata(imageData, prompt);
       await setDesktopBackground(imagePath);
@@ -232,20 +231,21 @@ async function ServiceLoop() {
   } else {
     console.log("Duplicate prompt detected. Loading cache");
     // Clean up old images after saving a new one
-    cleanUpOldImages();
+    await cleanUpOldImages();
 
     await setDesktopBackground(cache);
     showNotification("Background changed [from cache]", `Prompt: "${prompt}"`);
   }
 }
 
-export function startService(): void {
+export async function startService(): Promise<void> {
   // Stop any existing task if it's running
   if (currentTask) {
     currentTask.stop();
   }
+  let cronexpr = await storage.get('CRON_EXPRESSION');
 
-  let CRON_EXPRESSION = process.env.CRON_EXPRESSION ?? "0 * * * *";
+  let CRON_EXPRESSION = cronexpr ?? "0 * * * *";
 
   currentTask = cron.schedule(CRON_EXPRESSION, () => {
     ServiceLoop();
@@ -278,4 +278,9 @@ export function stopService(): void {
 
 export function serviceStatus(): boolean {
   return !!currentTask;
+}
+
+// Show notification
+export function showNotification(title: string, body: string) {
+  new Notification({ title, body }).show();
 }

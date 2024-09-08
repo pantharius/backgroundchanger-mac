@@ -2,52 +2,41 @@ import { app, Menu, Tray } from "electron";
 import path from "path";
 import { menubar } from "menubar";
 import {
+  createIfNotExistsBackgroundDir,
   serviceStatus,
   showNotification,
   startService,
   stopService,
 } from "./background";
-import { ChangeBackgroundDirectory, configureHFKey, OpenPromptsTxt, updateCronExpression } from "./settings";
+import { updateSettings, OpenPromptsTxt } from "./settings";
+import storage from 'node-persist';
 
 // Path to your tray icon
 const iconPath = path.join(__dirname, "..", "IconTemplate.png");
 let tray: Tray;
 
-export const buildMenu = () => {
-
-  const isStartServiceEnabled = !!process.env.HF_API_KEY && !serviceStatus()
-  const isStopServiceEnabled =  !!process.env.HF_API_KEY && serviceStatus();
+export const buildMenu = async () => {
+  const hfApiKey = await storage.get('HF_API_KEY');
+  const isStartServiceEnabled = !!hfApiKey && !serviceStatus()
+  const isStopServiceEnabled = !!hfApiKey && serviceStatus();
+  const renderTooltip = (state: string) => hfApiKey ? `Service already ${state}.` : "HFKey Needed";
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Start Service",
-      click: () => startService(),
+      click: () => { startService() },
       enabled: isStartServiceEnabled,
-      toolTip: isStartServiceEnabled?"":(!process.env.HF_API_KEY ? "HFKey Needed" : "Service already started.")
+      toolTip: isStartServiceEnabled ? "" : renderTooltip("started")
     },
     {
       label: "Stop Service",
       click: () => stopService(),
-      enabled: !!process.env.HF_API_KEY && serviceStatus(),
-      toolTip: isStopServiceEnabled?"":(!process.env.HF_API_KEY ? "HFKey Needed" : "Service already stopped.")
+      enabled: isStopServiceEnabled,
+      toolTip: isStopServiceEnabled ? "" :  renderTooltip("stopped")
     },
     { type: "separator" },
     {
-      type:"submenu",
-      label:"Paramètres",
-      submenu:[
-        {
-          label: "Update cron expression",
-          click: () => updateCronExpression(),
-        },
-        {
-          label: "Configure HF Key",
-          click: () => configureHFKey(),
-        },
-        {
-          label: "Change background directory",
-          click: () => ChangeBackgroundDirectory(),
-        },
-      ]
+      label: "Paramètres",
+      click: () => updateSettings(),
     },
     {
       label: "Open prompts.txt",
@@ -63,10 +52,15 @@ export const buildMenu = () => {
   ]);
   tray.setContextMenu(contextMenu);
 };
+
+
 // Create Tray Menu
-app.on("ready", () => {
+app.on("ready", async () => {
+  await storage.init();
   tray = new Tray(iconPath);
   buildMenu();
+
+  await createIfNotExistsBackgroundDir();
 
   const mb = menubar({
     tray,
@@ -81,6 +75,6 @@ app.on("ready", () => {
   });
 });
 // Prevent the app from quitting when all windows are closed
-app.on('window-all-closed', (event:any) => {
+app.on('window-all-closed', (event: any) => {
   console.log("preventing closing app");
 });

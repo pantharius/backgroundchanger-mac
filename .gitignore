@@ -1,6 +1,7 @@
 node_modules/
 backgrounds/
 dist/
+.node-persist/
 background_changer.pid
 .DS_Store
 .env
