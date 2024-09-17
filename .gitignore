@@ -5,3 +5,4 @@ dist/
 background_changer.pid
 .DS_Store
 .env
+nohup.out

@@ -12,8 +12,7 @@ import storage from 'node-persist';
 
 dotenv.config();
 
-const MODEL = "models/black-forest-labs/FLUX.1-schnell";
-const API_URL = "https://api-inference.huggingface.co/" + MODEL;
+const API_URL = "https://api-inference.huggingface.co/models/";
 const PROMPTS_FILE = path.join(__dirname, "../prompts.txt");
 const PID_FILE = path.join(__dirname, "../background_changer.pid");
 
@@ -33,9 +32,9 @@ function getRandomPrompt(): string {
   return prompts[Math.floor(Math.random() * prompts.length)].trim();
 }
 
-async function generateImage(prompt: string): Promise<Buffer | null> {
+async function generateImage(prompt: string, model: string): Promise<Buffer | null> {
   const hfApiKey = await storage.get('HF_API_KEY');
-  const response = await fetch(API_URL, {
+  const response = await fetch(API_URL + model, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -100,7 +99,7 @@ async function saveImageWithMetadata(
   prompt: string
 ): Promise<string> {
   let bgdir = await storage.get('BACKGROUND_DIR');
-  let BACKGROUND_DIR =bgdir?? path.join(__dirname, "../backgrounds");
+  let BACKGROUND_DIR = bgdir?? path.join(__dirname, "../backgrounds");
   const existingFiles = fs.readdirSync(BACKGROUND_DIR);
   const lastNumber = existingFiles
     .map((file) => {
@@ -214,14 +213,16 @@ async function ServiceLoop() {
   console.log(`Using prompt: ${prompt}`);
   const cache = await isDuplicate(prompt);
   if (cache === null) {
-    const imageData = await generateImage(prompt);
+    let modelname = await storage.get('MODEL');
+    const MODEL = modelname||"black-forest-labs/FLUX.1-schnell";
+    const imageData = await generateImage(prompt, MODEL);
     if (imageData) {
       // Clean up old images after saving a new one
       await cleanUpOldImages();
 
       const imagePath = await saveImageWithMetadata(imageData, prompt);
       await setDesktopBackground(imagePath);
-      showNotification("Background changed", `Prompt: "${prompt}"`);
+      showNotification(`Background changed [from ${MODEL}]`, `Prompt: "${prompt}"`);
     } else {
       showNotification(
         "Error occured",

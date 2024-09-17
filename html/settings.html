@@ -42,8 +42,7 @@
   <!-- Algorithm Model -->
   <label for="MODEL">Select Algorithm Model</label>
   <select id="MODEL">
-    <option value="model1">Model 1</option>
-    <option value="model2">Model 2</option>
+    <option value="" disabled selected>Select a model</option>
   </select>
 
   <!-- Save Button -->
@@ -51,13 +50,35 @@
 
   <script>
     const { ipcRenderer } = require('electron');
+
     // Listen for default settings from the main process
-    ipcRenderer.on('default-settings', (event, settings) => {
+    ipcRenderer.on('default-settings', (event, settings, models) => {
       settings = JSON.parse(settings);
-      document.getElementById('CRON_EXPRESSION').value = settings.CRON_EXPRESSION;
-      document.getElementById('HF_API_KEY').value = settings.HF_API_KEY;
-      document.getElementById('BACKGROUND_DIR').value = settings.BACKGROUND_DIR;
-      document.getElementById('MODEL').value = settings.MODEL;
+      document.getElementById('CRON_EXPRESSION').value = settings.CRON_EXPRESSION||"";
+      document.getElementById('HF_API_KEY').value = settings.HF_API_KEY||"";
+      document.getElementById('BACKGROUND_DIR').value = settings.BACKGROUND_DIR||"";
+      
+      document.getElementById('BACKGROUND_DIR').addEventListener('click', () => {
+        // Send an event to the main process to open the directory dialog
+        ipcRenderer.send('open-directory-dialog');
+      });
+
+      // Receive the selected directory path from the main process
+      ipcRenderer.on('selected-directory', (event, path) => {
+        document.getElementById('BACKGROUND_DIR').value = path;
+      });
+      
+      const modelSelect = document.getElementById('MODEL');
+      if(models){
+        models
+          .forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.modelId;  // Set model ID as the option value
+            option.textContent = model.modelId;  // Display the model name
+            modelSelect.appendChild(option);
+        });
+      }
+      document.getElementById('MODEL').value = settings.MODEL||"";
     });
 
     document.getElementById('saveButton').addEventListener('click', () => {

@@ -8,7 +8,17 @@ import storage from 'node-persist';
 let inputWindow: BrowserWindow | null = null;
 
 
-export function updateSettings() {
+export async function updateSettings() {
+  const hfApiKey = await storage.get('HF_API_KEY');
+  const modelsQuery = await fetch("https://huggingface.co/api/models?filter=text-to-image,diffusers&sort=likes&limit=100000&config=true&full=true", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${hfApiKey}`,
+    }
+  });
+  const models = await modelsQuery.json();
+
   inputWindow = new BrowserWindow({
     width: 500,
     height: 400,
@@ -19,20 +29,34 @@ export function updateSettings() {
   });
 
   inputWindow.loadFile(path.join(__dirname, "..", "html", "settings.html"));
+
   // Send the default values to the renderer process
   inputWindow?.webContents.on('did-finish-load', async () => {
     inputWindow?.webContents.send('default-settings', JSON.stringify({
-      CRON_EXPRESSION: await storage.get('CRON_EXPRESSION'),
+      CRON_EXPRESSION: await storage.get('CRON_EXPRESSION')??"0 * * * *",
       HF_API_KEY: await storage.get('HF_API_KEY'),
       BACKGROUND_DIR: await storage.get('BACKGROUND_DIR')??path.join(__dirname, "../backgrounds"),
-      MODEL: await storage.get('MODEL'),
-    }));
+      MODEL: await storage.get('MODEL')
+    }), 
+    models.filter((model:any) => (model.config?.diffusers)&&model.inference!="pipeline-library-pair-not-supported"&&model.inference!="not-popular-enough"&&model.inference!="explicit-opt-out"));
   });
 
   inputWindow.on('closed', () => {
     inputWindow = null;
   });
 }
+ipcMain.on('open-directory-dialog', (event) => {
+  const selectedDir = dialog.showOpenDialogSync({
+    properties: ["openDirectory"],
+    message: "Select a new background directory",
+    defaultPath: process.env.BACKGROUND_DIR,
+  });
+
+  if (selectedDir && selectedDir.length > 0) {
+    const newDir = selectedDir[0];
+    event.sender.send('selected-directory', newDir);
+  }
+});
 ipcMain.on('save-settings', async (event, settings) => {
   await storage.set("CRON_EXPRESSION",settings.CRON_EXPRESSION);
   await storage.set("HF_API_KEY",settings.HF_API_KEY);
