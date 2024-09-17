@@ -13,7 +13,13 @@
     "productName": "BG Changer",
     "win": {
       "target": "nsis",
-      "icon": "Icon.png"
+      "icon": "IconTr.png"
+    },
+    "mac": {
+      "icon": "Icon.icns"
+    },
+    "linux": {
+      "icon": "IconTr.png"
     },
     "files": [
       "dist/**/*"

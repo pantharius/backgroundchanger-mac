@@ -1,12 +1,11 @@
 import { exec } from "child_process";
-import { BrowserWindow, dialog, ipcMain } from "electron";
+import { BrowserWindow, dialog, ipcMain, shell } from "electron";
 import path from "path";
 import fs from "fs";
 import { startService } from "./background";
 import storage from 'node-persist';
 
 let inputWindow: BrowserWindow | null = null;
-
 
 export async function updateSettings() {
   const hfApiKey = await storage.get('HF_API_KEY');
@@ -87,5 +86,20 @@ export function OpenPromptsTxt() {
     }
   } else {
     console.error("prompts.txt does not exist.");
+  }
+}
+
+export async function openImageDirectory() {
+  try {
+    // Retrieve the background directory path from storage
+    let bgdir = await storage.get('BACKGROUND_DIR');
+    if (bgdir) {
+      // Open the directory in the system's file explorer
+      await shell.openPath(bgdir);
+    } else {
+      console.error('Background directory is not set.');
+    }
+  } catch (error) {
+    console.error('Error opening directory:', error);
   }
 }

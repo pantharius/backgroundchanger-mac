@@ -222,7 +222,7 @@ async function ServiceLoop() {
 
       const imagePath = await saveImageWithMetadata(imageData, prompt);
       await setDesktopBackground(imagePath);
-      showNotification(`Background changed [from ${MODEL}]`, `Prompt: "${prompt}"`);
+      showNotification("Background changed", `Prompt: "${prompt}"\nModel: "${MODEL}"`);
     } else {
       showNotification(
         "Error occured",

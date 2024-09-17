@@ -8,7 +8,7 @@ import {
   startService,
   stopService,
 } from "./background";
-import { updateSettings, OpenPromptsTxt } from "./settings";
+import { updateSettings, OpenPromptsTxt, openImageDirectory } from "./settings";
 import storage from 'node-persist';
 
 // Path to your tray icon
@@ -37,6 +37,10 @@ export const buildMenu = async () => {
     {
       label: "Paramètres",
       click: () => updateSettings(),
+    },
+    {
+      label: "Open BG Dir",
+      click: () => openImageDirectory(),
     },
     {
       label: "Open prompts.txt",
