@@ -19,8 +19,10 @@ export async function updateSettings() {
   const models = await modelsQuery.json();
 
   inputWindow = new BrowserWindow({
-    width: 500,
-    height: 400,
+    width: 475,
+    height: 650,
+    minWidth:475,
+    minHeight:650,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
