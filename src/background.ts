@@ -182,15 +182,6 @@ async function setDesktopBackgroundMacOs(imagePath: string): Promise<void> {
       }
     });
   });
-
-  // // Use AppleScript to set the desktop background
-  // const script = `tell application "System Events" to set picture of every desktop to POSIX file "${tmpFilePath}"`;
-
-  // exec(`osascript -e '${script}'`, (error) => {
-  //     if (error) {
-  //         console.error(`Error setting desktop background: ${error}`);
-  //     }
-  // });
 }
 
 async function isDuplicate(prompt: string): Promise<string | null> {
