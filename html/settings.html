@@ -10,21 +10,36 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
     />
     <style>
+      :root {
+        --primary-color: #0d0828;
+        --secondary-color: #7b7b7b;
+        --background-color: #fafafa;
+        --text-color: #333333;
+        --border-color: #c0c0c0;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --hover-bg-color: #ececec;
+        --hover-bg-color-selected: #493c94;
+      }
+      .m-0 {
+        margin: 0;
+      }
       body {
         font-family: "Roboto", sans-serif;
-        background-color: #f0f4f8;
         margin: 0;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        padding: 20px;
+        min-height: 100vh;
+        line-height: 1.4;
+        color: var(--text-color);
+        background-color: var(--background-color);
+        padding: 5px;
       }
       .container {
         max-width: 500px;
         width: 100%;
         background: #fff;
-        padding: 30px;
+        padding: 20px 30px 30px;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
@@ -32,8 +47,10 @@
         margin-top: 0;
         font-size: 1.5em;
         margin-bottom: 20px;
+        margin-top: 0;
         color: #333;
         text-align: center;
+        text-transform: uppercase;
         font-weight: 500;
       }
       label {
@@ -41,12 +58,14 @@
         margin: 15px 0 5px;
         font-weight: 500;
         color: #444;
+        text-transform: uppercase;
+        font-weight: bold;
       }
       input,
       select {
         width: 100%;
         padding: 12px 15px;
-        margin: 5px 0 20px;
+        margin: 5px 0 10px;
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 1em;
@@ -54,17 +73,17 @@
         outline: none;
         transition: border-color 0.2s ease;
       }
-      input{
+      input {
         width: calc(100% - 30px);
       }
       input:focus,
       select:focus {
-        border-color: #007bff;
+        border-color: var(--primary-color);
       }
       button {
         width: 100%;
         padding: 12px;
-        background-color: #007bff;
+        background-color: var(--primary-color);
         color: white;
         border: none;
         border-radius: 4px;
@@ -74,7 +93,7 @@
         transition: background-color 0.3s ease;
       }
       button:hover {
-        background-color: #0056b3;
+        background-color: var(--hover-bg-color-selected);
       }
       button:active {
         background-color: #004080;
@@ -86,6 +105,174 @@
         margin-top: 10px;
       }
 
+      .cron-builder {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px var(--shadow-color);
+        border: 1px solid var(--border-color);
+      }
+
+      h2 {
+        text-align: center;
+        color: var(--primary-color);
+        margin: 0 0 15px;
+        font-size: 1.1em;
+      }
+
+      .unit-control {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .unit-label {
+        font-weight: bold;
+        color: var(--primary-color);
+        font-size: 0.9em;
+        width: 70px;
+      }
+
+      .switch-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 24px;
+        margin-right: 8px;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--border-color);
+        transition: 0.3s;
+        border-radius: 24px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--primary-color);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(16px);
+      }
+
+      .slider-container {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+        margin-left: 8px;
+      }
+
+      .value-input {
+        width: 100%;
+        margin: 0 5px;
+        -webkit-appearance: none;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--border-color);
+        outline: none;
+        padding: 0px;
+      }
+
+      .value-input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        cursor: pointer;
+      }
+
+      .value-display {
+        min-width: 30px;
+        text-align: center;
+        font-weight: bold;
+        color: var(--primary-color);
+        font-size: 0.9em;
+      }
+
+      .cron-expression {
+        background-color: var(--background-color);
+        padding: 8px;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+        margin-top: 15px;
+        font-size: 0.9em;
+        word-break: break-all;
+        text-align: center;
+        color: var(--text-color);
+        border: 1px solid var(--primary-color);
+      }
+
+      .weekday-control {
+        display: grid;
+        width: 100%;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+        margin-top: 5px;
+      }
+
+      .weekday-btn {
+        padding: 6px 2px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        background-color: #ffffff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.8em;
+        border-radius: 4px;
+      }
+
+      .weekday-btn.selected {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+
+      .weekday-btn:hover {
+        background-color: var(--hover-bg-color);
+      }
+      .weekday-btn.selected:hover {
+        background-color: var(--hover-bg-color-selected);
+      }
+      .switch-label {
+        font-size: 0.8em;
+        font-weight: bold;
+        color: var(--secondary-color);
+      }
+
       @media (max-width: 768px) {
         body {
           padding: 0px;
@@ -95,7 +282,7 @@
         .container {
           max-width: none;
           box-shadow: none;
-          border:none;
+          border: none;
           border-radius: 0;
         }
       }
@@ -105,9 +292,15 @@
     <div class="container">
       <h3>Configure Your Settings</h3>
 
-      <!-- Cron Expression -->
-      <label for="CRON_EXPRESSION">Cron Expression</label>
-      <input type="text" id="CRON_EXPRESSION" placeholder="e.g., * * * * *" />
+      <!-- Replace Cron Expression Input with Cron Schedule Builder -->
+      <label for="cron-builder">Process Frequency</label>
+      <div class="cron-builder">
+        <div id="unitControls"></div>
+        <div class="cron-expression" id="cronExpression"></div>
+      </div>
+
+      <!-- Hidden Cron Expression Input to Store Final Value -->
+      <input type="hidden" id="CRON_EXPRESSION" />
 
       <!-- Hugging Face API Key -->
       <label for="HF_API_KEY">Hugging Face API Key</label>
@@ -125,18 +318,20 @@
 
       <!-- Save Button -->
       <button id="saveButton">Save</button>
-
-      <div class="note">All changes will be saved securely.</div>
     </div>
 
     <script>
       const { ipcRenderer } = require("electron");
 
-      // Listen for default settings from the main process
+      // Handle default settings
       ipcRenderer.on("default-settings", (event, settings, models) => {
         settings = JSON.parse(settings);
         document.getElementById("CRON_EXPRESSION").value =
           settings.CRON_EXPRESSION || "";
+
+        // Initialize with a custom starting value
+        initializeCronBuilder(settings.CRON_EXPRESSION);
+
         document.getElementById("HF_API_KEY").value = settings.HF_API_KEY || "";
         document.getElementById("BACKGROUND_DIR").value =
           settings.BACKGROUND_DIR || "";
@@ -144,11 +339,9 @@
         document
           .getElementById("BACKGROUND_DIR")
           .addEventListener("click", () => {
-            // Send an event to the main process to open the directory dialog
             ipcRenderer.send("open-directory-dialog");
           });
 
-        // Receive the selected directory path from the main process
         ipcRenderer.on("selected-directory", (event, path) => {
           document.getElementById("BACKGROUND_DIR").value = path;
         });
@@ -157,14 +350,15 @@
         if (models) {
           models.forEach((model) => {
             const option = document.createElement("option");
-            option.value = model.modelId; // Set model ID as the option value
-            option.textContent = model.modelId; // Display the model name
+            option.value = model.modelId;
+            option.textContent = model.modelId;
             modelSelect.appendChild(option);
           });
         }
         document.getElementById("MODEL").value = settings.MODEL || "";
       });
 
+      // Save settings event
       document.getElementById("saveButton").addEventListener("click", () => {
         const CRON_EXPRESSION =
           document.getElementById("CRON_EXPRESSION").value;
@@ -172,7 +366,6 @@
         const BACKGROUND_DIR = document.getElementById("BACKGROUND_DIR").value;
         const MODEL = document.getElementById("MODEL").value;
 
-        // Send data to the main process
         ipcRenderer.send("save-settings", {
           CRON_EXPRESSION,
           HF_API_KEY,
@@ -182,6 +375,219 @@
 
         alert("Settings saved!");
       });
+
+      // Constants and Initial State
+      const units = [
+        { name: "minute", range: { min: 0, max: 59 } },
+        { name: "hour", range: { min: 0, max: 23 } },
+        { name: "day", range: { min: 0, max: 31 } },
+        { name: "month", range: { min: 0, max: 11 } },
+      ];
+
+      const monthNames = [
+        "Jan",
+        "Fév",
+        "Mar",
+        "Avr",
+        "Mai",
+        "Juin",
+        "Juil",
+        "Aoû",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Déc",
+      ];
+
+      const weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      const state = {};
+
+      // Create Switch Function
+      function createSwitch(id, checked = false) {
+        return `
+          <label class="switch">
+            <input type="checkbox" id="${id}" ${checked ? "checked" : ""}>
+            <span class="slider"></span>
+          </label>
+          <span class="switch-label">Every</span>
+        `;
+      }
+
+      // Create Slider for Range Inputs
+      function createSlider(unit) {
+        return `
+          <div class="slider-container">
+            <input type="range" id="${unit.name}-slider" class="value-input" 
+                   min="${unit.range.min}" max="${unit.range.max}" value="${unit.range.min}">
+            <span id="${unit.name}-value" class="value-display">${unit.range.min}</span>
+          </div>
+        `;
+      }
+
+      // Create Each Unit Control (Minute, Hour, Day, Month)
+      function createUnitControl(unit) {
+        const control = document.createElement("div");
+        control.className = "unit-control";
+        control.innerHTML = `
+          <div class="unit-label">${
+            unit.name.charAt(0).toUpperCase() + unit.name.slice(1)
+          }:</div>
+          ${createSwitch(unit.name + "-switch")}
+          ${createSlider(unit)}
+        `;
+
+        const switchElem = control.querySelector(`#${unit.name}-switch`);
+        const sliderElem = control.querySelector(`#${unit.name}-slider`);
+        const valueElem = control.querySelector(`#${unit.name}-value`);
+
+        const onChangeSwitchElem = () => {
+          // Update slider range and labels based on switch state
+          if (switchElem.checked) {
+            // "Every" case
+            if (unit.name === "month") {
+              sliderElem.min = 1;
+              sliderElem.max = 12;
+              sliderElem.value = 1;
+            } else if (unit.name === "day") {
+              sliderElem.min = 1;
+              sliderElem.max = 30;
+            } else {
+              sliderElem.min = 1;
+              sliderElem.max = unit.range.max;
+            }
+          } else {
+            // "Specific" case
+            sliderElem.min = unit.range.min;
+            sliderElem.max = unit.range.max;
+          }
+          valueElem.textContent =
+            unit.name === "month" && !switchElem.checked
+              ? monthNames[sliderElem.value]
+              : sliderElem.value;
+          updateUnitValue(unit.name);
+        };
+        switchElem.addEventListener("change", onChangeSwitchElem);
+        sliderElem.addEventListener("input", () => {
+          valueElem.textContent =
+            unit.name === "month" && !switchElem.checked
+              ? monthNames[sliderElem.value]
+              : sliderElem.value;
+          updateUnitValue(unit.name);
+        });
+
+        return { control, onChangeSwitchElem };
+      }
+
+      // Create Weekday Control
+      function createWeekdayControl() {
+        const control = document.createElement("div");
+        control.className = "unit-control";
+        control.innerHTML = `
+          <div class="weekday-control">
+            ${weekdayNames
+              .map(
+                (day, index) => `
+                <div class="weekday-btn" data-day="${index}">${day}</div>
+              `
+              )
+              .join("")}
+          </div>
+        `;
+
+        const weekdayButtons = control.querySelectorAll(".weekday-btn");
+        weekdayButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            btn.classList.toggle("selected");
+            updateWeekdayValue();
+          });
+        });
+
+        return control;
+      }
+
+      // Update State for Each Unit
+      function updateUnitValue(unitName) {
+        const switchElem = document.querySelector(`#${unitName}-switch`);
+        const sliderElem = document.querySelector(`#${unitName}-slider`);
+
+        state[unitName] = switchElem.checked
+          ? `*/${sliderElem.value}`
+          : sliderElem.value;
+        updateCronExpression();
+      }
+
+      // Update Selected Weekdays
+      function updateWeekdayValue() {
+        const selectedDays = document.querySelectorAll(".weekday-btn.selected");
+        if (selectedDays.length === 7) {
+          state.weekday = "*";
+        } else {
+          state.weekday = Array.from(selectedDays)
+            .map((btn) => btn.dataset.day)
+            .join(",");
+        }
+        updateCronExpression();
+      }
+
+      // Display Cron Expression
+      function updateCronExpression() {
+        const expression = units
+          .map((unit) => state[unit.name] || "*")
+          .concat(state.weekday || "*")
+          .join(" ");
+        document.getElementById(
+          "cronExpression"
+        ).textContent = `Cron: ${expression}`;
+      }
+
+      // Initialize Component
+      function initializeCronBuilder(initialValue = "* * * * *") {
+        const container = document.getElementById("unitControls");
+        const initialValues = initialValue.split(" ");
+
+        units.forEach((unit, index) => {
+          const { control, onChangeSwitchElem } = createUnitControl(unit);
+          container.appendChild(control);
+
+          const initialUnitValue = initialValues[index] || "*";
+          const switchElem = control.querySelector(`#${unit.name}-switch`);
+          const sliderElem = control.querySelector(`#${unit.name}-slider`);
+          const valueElem = control.querySelector(`#${unit.name}-value`);
+
+          if (initialUnitValue.includes("/")) {
+            switchElem.checked = true;
+            const stepValue = initialUnitValue.split("/")[1];
+            sliderElem.value = stepValue;
+            valueElem.textContent =
+              unit.name === "month" ? stepValue : stepValue;
+          } else if (initialUnitValue !== "*") {
+            sliderElem.value = initialUnitValue;
+            valueElem.textContent =
+              unit.name === "month"
+                ? monthNames[initialUnitValue]
+                : initialUnitValue;
+          }
+          onChangeSwitchElem();
+          updateUnitValue(unit.name);
+        });
+
+        const weekdayControl = createWeekdayControl();
+        container.appendChild(weekdayControl);
+
+        const initialWeekday = initialValues[4] || "*";
+        if (initialWeekday[0] == "*") {
+          weekdayControl
+            .querySelectorAll(".weekday-btn")
+            .forEach((el) => el.classList.add("selected"));
+        } else {
+          initialWeekday.split(",").forEach((day) => {
+            weekdayControl
+              .querySelector(`.weekday-btn[data-day="${day}"]`)
+              .classList.add("selected");
+          });
+        }
+        updateWeekdayValue();
+      }
     </script>
   </body>
 </html>
