@@ -360,8 +360,10 @@
 
       // Save settings event
       document.getElementById("saveButton").addEventListener("click", () => {
-        const CRON_EXPRESSION =
-          document.getElementById("CRON_EXPRESSION").value;
+        const CRON_EXPRESSION = units
+          .map((unit) => state[unit.name] || "*")
+          .concat(state.weekday || "*")
+          .join(" ");
         const HF_API_KEY = document.getElementById("HF_API_KEY").value;
         const BACKGROUND_DIR = document.getElementById("BACKGROUND_DIR").value;
         const MODEL = document.getElementById("MODEL").value;
