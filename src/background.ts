@@ -8,7 +8,8 @@ import { Notification } from "electron";
 import { buildMenu } from "./main";
 import cron from "node-cron";
 import cronstrue from "cronstrue";
-import storage from 'node-persist';
+import storage from "node-persist";
+import { createHash } from "crypto";
 
 dotenv.config();
 
@@ -17,9 +18,11 @@ const PROMPTS_FILE = path.join(__dirname, "../prompts.txt");
 const PID_FILE = path.join(__dirname, "../background_changer.pid");
 
 let currentTask: cron.ScheduledTask | null = null;
+let cacheFiles: Record<string, any> | null = null;
+const cacheFilename = ".cacheFiles.json";
 
-export async function createIfNotExistsBackgroundDir(){
-  let bgdir = await storage.get('BACKGROUND_DIR');
+export async function createIfNotExistsBackgroundDir() {
+  let bgdir = await storage.get("BACKGROUND_DIR");
   let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
   // Ensure the backgrounds directory exists
   if (!fs.existsSync(BACKGROUND_DIR)) {
@@ -27,13 +30,37 @@ export async function createIfNotExistsBackgroundDir(){
   }
 }
 
+async function getCacheFilePath(): Promise<string> {
+  let bgdir = await storage.get("BACKGROUND_DIR");
+  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
+  return path.join(BACKGROUND_DIR, cacheFilename);
+}
+
+async function loadCache(): Promise<Record<string, string>> {
+  let cacheFilePath = await getCacheFilePath();
+
+  if (fs.existsSync(cacheFilePath)) {
+    const data = fs.readFileSync(cacheFilePath, "utf8");
+    return JSON.parse(data);
+  }
+  return {};
+}
+
+async function saveCache() {
+  let cacheFilePath = await getCacheFilePath();
+  fs.writeFileSync(cacheFilePath, JSON.stringify(cacheFiles, null, 2), "utf8");
+}
+
 function getRandomPrompt(): string {
   const prompts = fs.readFileSync(PROMPTS_FILE, "utf8").split("\n");
   return prompts[Math.floor(Math.random() * prompts.length)].trim();
 }
 
-async function generateImage(prompt: string, model: string): Promise<Buffer | null> {
-  const hfApiKey = await storage.get('HF_API_KEY');
+async function generateImage(
+  prompt: string,
+  model: string
+): Promise<Buffer | null> {
+  const hfApiKey = await storage.get("HF_API_KEY");
   const response = await fetch(API_URL + model, {
     method: "POST",
     headers: {
@@ -54,7 +81,7 @@ async function generateImage(prompt: string, model: string): Promise<Buffer | nu
 }
 
 async function cleanUpOldImages() {
-  let bgdir = await storage.get('BACKGROUND_DIR');
+  let bgdir = await storage.get("BACKGROUND_DIR");
   let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
   const files = fs.readdirSync(BACKGROUND_DIR).map((file) => ({
     name: file,
@@ -98,10 +125,12 @@ async function saveImageWithMetadata(
   imageData: Buffer,
   prompt: string
 ): Promise<string> {
-  let bgdir = await storage.get('BACKGROUND_DIR');
-  let BACKGROUND_DIR = bgdir?? path.join(__dirname, "../backgrounds");
+  let bgdir = await storage.get("BACKGROUND_DIR");
+  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
+
   const existingFiles = fs.readdirSync(BACKGROUND_DIR);
   const lastNumber = existingFiles
+    .filter((file) => file != cacheFilename)
     .map((file) => {
       const match = file.match(/^bg(\d+)\.jpg$/);
       return match ? parseInt(match[1], 10) : 0;
@@ -126,34 +155,40 @@ async function saveImageWithMetadata(
   return filePath;
 }
 async function setDesktopBackground(imagePath: string) {
-  if (process.platform === 'win32') {
+  if (process.platform === "win32") {
     await setDesktopBackgroundWindows(imagePath);
-  }else{
+  } else {
     await setDesktopBackgroundMacOs(imagePath);
   }
 }
 
-async function setDesktopBackgroundWindows(imagePath:string) {
+async function setDesktopBackgroundWindows(imagePath: string) {
   try {
     const resolvedImagePath = path.resolve(imagePath);
 
     // Update the wallpaper path in the Windows registry
-    exec(`reg add "HKCU\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "${resolvedImagePath}" /f`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error setting registry wallpaper: ${error.message}`);
-        return;
-      }
-
-      // Force the system to refresh the wallpaper
-      exec('RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters', (error, stdout, stderr) => {
+    exec(
+      `reg add "HKCU\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "${resolvedImagePath}" /f`,
+      (error, stdout, stderr) => {
         if (error) {
-          console.error(`Error refreshing desktop: ${error.message}`);
+          console.error(`Error setting registry wallpaper: ${error.message}`);
           return;
         }
-        console.log('Desktop background set successfully on Windows');
-      });
-    });
-  } catch (error:any) {
+
+        // Force the system to refresh the wallpaper
+        exec(
+          "RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters",
+          (error, stdout, stderr) => {
+            if (error) {
+              console.error(`Error refreshing desktop: ${error.message}`);
+              return;
+            }
+            console.log("Desktop background set successfully on Windows");
+          }
+        );
+      }
+    );
+  } catch (error: any) {
     console.error(`Error setting desktop background: ${error.message}`);
   }
 }
@@ -185,17 +220,45 @@ async function setDesktopBackgroundMacOs(imagePath: string): Promise<void> {
 }
 
 async function isDuplicate(prompt: string): Promise<string | null> {
-  let bgdir = await storage.get('BACKGROUND_DIR');
+  console.time("isDuplicate");
+  let bgdir = await storage.get("BACKGROUND_DIR");
   let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
   const files = fs.readdirSync(BACKGROUND_DIR);
+  let cacheUpdated = false;
 
   for (const file of files) {
     const filePath = path.join(BACKGROUND_DIR, file);
-    const metadata = await exiftool.read(filePath);
-    if (metadata.Comment === prompt) {
-      return filePath;
+    const hash = createHash("md5").update(filePath).digest("hex");
+    if (!cacheFiles) cacheFiles = await loadCache();
+    const cacheValue = cacheFiles[hash];
+
+    if (cacheValue) {
+      if (cacheValue === prompt) {
+        console.timeEnd("isDuplicate");
+        if (cacheUpdated) {
+          await saveCache();
+        }
+        return filePath;
+      }
+    } else {
+      const metadata = await exiftool.read(filePath);
+      cacheFiles[hash] = metadata.Comment;
+      cacheUpdated = true;
+      if (metadata.Comment === prompt) {
+        console.timeEnd("isDuplicate");
+        if (cacheUpdated) {
+          await saveCache();
+        }
+        return filePath;
+      }
     }
   }
+
+  if (cacheUpdated) {
+    await saveCache();
+  }
+
+  console.timeEnd("isDuplicate");
   return null;
 }
 
@@ -204,8 +267,8 @@ async function ServiceLoop() {
   console.log(`Using prompt: ${prompt}`);
   const cache = await isDuplicate(prompt);
   if (cache === null) {
-    let modelname = await storage.get('MODEL');
-    const MODEL = modelname||"black-forest-labs/FLUX.1-schnell";
+    let modelname = await storage.get("MODEL");
+    const MODEL = modelname || "black-forest-labs/FLUX.1-schnell";
     const imageData = await generateImage(prompt, MODEL);
     if (imageData) {
       // Clean up old images after saving a new one
@@ -213,7 +276,10 @@ async function ServiceLoop() {
 
       const imagePath = await saveImageWithMetadata(imageData, prompt);
       await setDesktopBackground(imagePath);
-      showNotification("Background changed", `Prompt: "${prompt}"\nModel: "${MODEL}"`);
+      showNotification(
+        "Background changed",
+        `Prompt: "${prompt}"\nModel: "${MODEL}"`
+      );
     } else {
       showNotification(
         "Error occured",
@@ -235,7 +301,7 @@ export async function startService(): Promise<void> {
   if (currentTask) {
     currentTask.stop();
   }
-  let cronexpr = await storage.get('CRON_EXPRESSION');
+  let cronexpr = await storage.get("CRON_EXPRESSION");
 
   let CRON_EXPRESSION = cronexpr ?? "0 * * * *";
 
@@ -253,6 +319,10 @@ export async function startService(): Promise<void> {
     `Your background will change ${cronstrue.toString(CRON_EXPRESSION)}.`
   );
 
+  ServiceLoop();
+}
+
+export async function generateNow() {
   ServiceLoop();
 }
 
