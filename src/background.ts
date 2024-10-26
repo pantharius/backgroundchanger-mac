@@ -212,7 +212,6 @@ async function setDesktopBackgroundMacOs(imagePath: string): Promise<void> {
         console.error(`stderr: ${stderr}`);
         reject(stderr);
       } else {
-        console.log(`stdout: ${stdout}`);
         resolve();
       }
     });
@@ -220,7 +219,6 @@ async function setDesktopBackgroundMacOs(imagePath: string): Promise<void> {
 }
 
 async function isDuplicate(prompt: string): Promise<string | null> {
-  console.time("isDuplicate");
   let bgdir = await storage.get("BACKGROUND_DIR");
   let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
   const files = fs.readdirSync(BACKGROUND_DIR);
@@ -234,7 +232,6 @@ async function isDuplicate(prompt: string): Promise<string | null> {
 
     if (cacheValue) {
       if (cacheValue === prompt) {
-        console.timeEnd("isDuplicate");
         if (cacheUpdated) {
           await saveCache();
         }
