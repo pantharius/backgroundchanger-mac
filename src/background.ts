@@ -242,7 +242,6 @@ async function isDuplicate(prompt: string): Promise<string | null> {
       cacheFiles[hash] = metadata.Comment;
       cacheUpdated = true;
       if (metadata.Comment === prompt) {
-        console.timeEnd("isDuplicate");
         if (cacheUpdated) {
           await saveCache();
         }
@@ -255,7 +254,6 @@ async function isDuplicate(prompt: string): Promise<string | null> {
     await saveCache();
   }
 
-  console.timeEnd("isDuplicate");
   return null;
 }
 
