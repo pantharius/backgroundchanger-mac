@@ -98,6 +98,36 @@
       button:active {
         background-color: #004080;
       }
+      #BACKGROUND_DIR_CONTAINER {
+        display: flex;
+        align-items: center;
+        justify-content: stretch;
+        width: calc(100% - 30px);
+        padding: 12px 15px;
+        margin: 5px 0 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1em;
+        background-color: #f9f9f9;
+        outline: none;
+        transition: border-color 0.2s ease;
+        cursor: pointer;
+      }
+      #BACKGROUND_DIR {
+        width: 100% !important;
+        cursor: pointer;
+        flex: 1;
+        padding: 0;
+        margin: 0;
+        border: none;
+        border-radius: 0;
+        font-size: 1em;
+        outline: none;
+      }
+      #BACKGROUND_DIR_CONTAINER > span > svg {
+        width: 20px;
+        height: 20px;
+      }
       .note {
         font-size: 0.9em;
         color: #777;
@@ -308,7 +338,31 @@
 
       <!-- Background Directory -->
       <label for="BACKGROUND_DIR">Background Directory</label>
-      <input type="text" id="BACKGROUND_DIR" placeholder="Choose directory" />
+      <div id="BACKGROUND_DIR_CONTAINER">
+        <input type="text" id="BACKGROUND_DIR" placeholder="Choose directory" />
+        <span class="folder-icon">
+          <svg
+            width="800px"
+            height="800px"
+            viewBox="0 0 512 512"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            aria-hidden="true"
+            role="img"
+            class="iconify iconify--fxemoji"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <path
+              fill="#0074A8"
+              d="M491 326V92.143C491 79.021 480.259 68 467.137 68H341.13c-9.287 0-17.723 5.603-21.596 14.044l-12.709 27.903C302.952 118.388 294.516 124 285.229 124H67.538C54.416 124 44 134.426 44 147.549v216.363C44 377.034 54.416 388 67.538 388h399.599c.628 0 1.248-.36 1.863-.408V433h.342c0 6 4.877 10.636 10.829 10.636c5.952 0 10.829-4.967 10.829-10.919V326z"
+            ></path>
+            <path
+              fill="#59CAFC"
+              d="M480.171 443.636c-5.952 0-10.829-4.636-10.829-10.636H469V210.181C469 197.058 458.661 186 445.539 186H45.94C32.818 186 22 197.058 22 210.181V449.37C22 462.492 32.818 473 45.94 473h399.599c1.385 0 2.741-.06 4.061-.288c1.639.227 3.31.385 5.012.385c20.04 0 36.136-16.229 36.136-36.269c0-.534-.036-1.058-.058-1.586c-1.147 4.766-5.435 8.394-10.519 8.394z"
+            ></path>
+          </svg>
+        </span>
+      </div>
 
       <!-- Algorithm Model -->
       <label for="MODEL">Select Algorithm Model</label>
