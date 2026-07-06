@@ -332,9 +332,42 @@
       <!-- Hidden Cron Expression Input to Store Final Value -->
       <input type="hidden" id="CRON_EXPRESSION" />
 
-      <!-- Hugging Face API Key -->
-      <label for="HF_API_KEY">Hugging Face API Key</label>
-      <input type="text" id="HF_API_KEY" placeholder="Enter your HF API Key" />
+      <!-- Image Provider -->
+      <label for="IMAGE_PROVIDER">Image Provider</label>
+      <select id="IMAGE_PROVIDER">
+        <option value="ollama">Ollama local</option>
+        <option value="huggingface">Hugging Face</option>
+      </select>
+
+      <div id="OLLAMA_SETTINGS">
+        <label for="OLLAMA_BASE_URL">Ollama Base URL</label>
+        <input
+          type="text"
+          id="OLLAMA_BASE_URL"
+          placeholder="http://localhost:11434"
+        />
+
+        <label for="OLLAMA_MODEL">Ollama Model</label>
+        <input type="text" id="OLLAMA_MODEL" placeholder="x/flux2-klein" />
+      </div>
+
+      <div id="HUGGING_FACE_SETTINGS">
+        <!-- Hugging Face API Key -->
+        <label for="HF_API_KEY">Hugging Face API Key</label>
+        <input
+          type="text"
+          id="HF_API_KEY"
+          placeholder="Enter your HF API Key"
+        />
+
+        <!-- Algorithm Model -->
+        <label for="HF_MODEL">Hugging Face Model</label>
+        <select id="HF_MODEL">
+          <option value="black-forest-labs/FLUX.1-schnell">
+            black-forest-labs/FLUX.1-schnell
+          </option>
+        </select>
+      </div>
 
       <!-- Background Directory -->
       <label for="BACKGROUND_DIR">Background Directory</label>
@@ -364,12 +397,6 @@
         </span>
       </div>
 
-      <!-- Algorithm Model -->
-      <label for="MODEL">Select Algorithm Model</label>
-      <select id="MODEL">
-        <option value="" disabled selected>Select a model</option>
-      </select>
-
       <!-- Save Button -->
       <button id="saveButton">Save</button>
     </div>
@@ -386,9 +413,16 @@
         // Initialize with a custom starting value
         initializeCronBuilder(settings.CRON_EXPRESSION);
 
+        document.getElementById("IMAGE_PROVIDER").value =
+          settings.IMAGE_PROVIDER || "ollama";
+        document.getElementById("OLLAMA_BASE_URL").value =
+          settings.OLLAMA_BASE_URL || "http://localhost:11434";
+        document.getElementById("OLLAMA_MODEL").value =
+          settings.OLLAMA_MODEL || "x/flux2-klein";
         document.getElementById("HF_API_KEY").value = settings.HF_API_KEY || "";
         document.getElementById("BACKGROUND_DIR").value =
           settings.BACKGROUND_DIR || "";
+        updateProviderFields();
 
         document
           .getElementById("BACKGROUND_DIR")
@@ -400,7 +434,9 @@
           document.getElementById("BACKGROUND_DIR").value = path;
         });
 
-        const modelSelect = document.getElementById("MODEL");
+        const modelSelect = document.getElementById("HF_MODEL");
+        const savedHuggingFaceModel =
+          settings.HF_MODEL || "black-forest-labs/FLUX.1-schnell";
         if (models) {
           models.forEach((model) => {
             const option = document.createElement("option");
@@ -409,8 +445,22 @@
             modelSelect.appendChild(option);
           });
         }
-        document.getElementById("MODEL").value = settings.MODEL || "";
+        if (
+          !Array.from(modelSelect.options).some(
+            (option) => option.value === savedHuggingFaceModel
+          )
+        ) {
+          const option = document.createElement("option");
+          option.value = savedHuggingFaceModel;
+          option.textContent = savedHuggingFaceModel;
+          modelSelect.appendChild(option);
+        }
+        document.getElementById("HF_MODEL").value = savedHuggingFaceModel;
       });
+
+      document
+        .getElementById("IMAGE_PROVIDER")
+        .addEventListener("change", updateProviderFields);
 
       // Save settings event
       document.getElementById("saveButton").addEventListener("click", () => {
@@ -418,19 +468,34 @@
           .map((unit) => state[unit.name] || "*")
           .concat(state.weekday || "*")
           .join(" ");
+        const IMAGE_PROVIDER = document.getElementById("IMAGE_PROVIDER").value;
+        const OLLAMA_BASE_URL =
+          document.getElementById("OLLAMA_BASE_URL").value;
+        const OLLAMA_MODEL = document.getElementById("OLLAMA_MODEL").value;
         const HF_API_KEY = document.getElementById("HF_API_KEY").value;
+        const HF_MODEL = document.getElementById("HF_MODEL").value;
         const BACKGROUND_DIR = document.getElementById("BACKGROUND_DIR").value;
-        const MODEL = document.getElementById("MODEL").value;
 
         ipcRenderer.send("save-settings", {
           CRON_EXPRESSION,
+          IMAGE_PROVIDER,
+          OLLAMA_BASE_URL,
+          OLLAMA_MODEL,
           HF_API_KEY,
+          HF_MODEL,
           BACKGROUND_DIR,
-          MODEL,
         });
 
         alert("Settings saved!");
       });
+
+      function updateProviderFields() {
+        const provider = document.getElementById("IMAGE_PROVIDER").value;
+        document.getElementById("OLLAMA_SETTINGS").style.display =
+          provider === "ollama" ? "block" : "none";
+        document.getElementById("HUGGING_FACE_SETTINGS").style.display =
+          provider === "huggingface" ? "block" : "none";
+      }
 
       // Constants and Initial State
       const units = [

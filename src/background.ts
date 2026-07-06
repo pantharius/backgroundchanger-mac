@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import { exec } from "child_process";
-import * as dotenv from "dotenv";
 import * as path from "path";
 import sharp from "sharp";
 import { exiftool } from "exiftool-vendored";
@@ -10,29 +9,29 @@ import cron from "node-cron";
 import cronstrue from "cronstrue";
 import storage from "node-persist";
 import { createHash } from "crypto";
+import { ImageGenerationService } from "./image-generation/ImageGenerationService";
+import {
+  buildImageCacheKey,
+  getBackgroundDirectory,
+} from "./image-generation/generationSettings";
 
-dotenv.config();
-
-const API_URL = "https://api-inference.huggingface.co/models/";
 const PROMPTS_FILE = path.join(__dirname, "../prompts.txt");
 const PID_FILE = path.join(__dirname, "../background_changer.pid");
 
 let currentTask: cron.ScheduledTask | null = null;
-let cacheFiles: Record<string, any> | null = null;
+let cacheFiles: Record<string, string> | null = null;
 const cacheFilename = ".cacheFiles.json";
 
 export async function createIfNotExistsBackgroundDir() {
-  let bgdir = await storage.get("BACKGROUND_DIR");
-  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
+  const BACKGROUND_DIR = await getBackgroundDirectory();
   // Ensure the backgrounds directory exists
   if (!fs.existsSync(BACKGROUND_DIR)) {
-    fs.mkdirSync(BACKGROUND_DIR);
+    fs.mkdirSync(BACKGROUND_DIR, { recursive: true });
   }
 }
 
 async function getCacheFilePath(): Promise<string> {
-  let bgdir = await storage.get("BACKGROUND_DIR");
-  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
+  const BACKGROUND_DIR = await getBackgroundDirectory();
   return path.join(BACKGROUND_DIR, cacheFilename);
 }
 
@@ -52,42 +51,26 @@ async function saveCache() {
 }
 
 function getRandomPrompt(): string {
-  const prompts = fs.readFileSync(PROMPTS_FILE, "utf8").split("\n");
+  const prompts = fs
+    .readFileSync(PROMPTS_FILE, "utf8")
+    .split("\n")
+    .map((prompt) => prompt.trim())
+    .filter(Boolean);
+
   return prompts[Math.floor(Math.random() * prompts.length)].trim();
 }
 
-async function generateImage(
-  prompt: string,
-  model: string
-): Promise<Buffer | null> {
-  const hfApiKey = await storage.get("HF_API_KEY");
-  const response = await fetch(API_URL + model, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${hfApiKey}`,
-    },
-    body: JSON.stringify({ inputs: prompt }),
-  });
-
-  if (!response.ok) {
-    console.error(`Error generating image: ${response.statusText}`);
-    return null;
-  }
-
-  // Use arrayBuffer and convert to Buffer
-  const arrayBuffer = await response.arrayBuffer();
-  return Buffer.from(arrayBuffer);
-}
-
 async function cleanUpOldImages() {
-  let bgdir = await storage.get("BACKGROUND_DIR");
-  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
-  const files = fs.readdirSync(BACKGROUND_DIR).map((file) => ({
-    name: file,
-    path: path.join(BACKGROUND_DIR, file),
-    stats: fs.statSync(path.join(BACKGROUND_DIR, file)),
-  }));
+  const BACKGROUND_DIR = await getBackgroundDirectory();
+  const files = fs
+    .readdirSync(BACKGROUND_DIR)
+    .filter((file) => file !== cacheFilename)
+    .map((file) => ({
+      name: file,
+      path: path.join(BACKGROUND_DIR, file),
+      stats: fs.statSync(path.join(BACKGROUND_DIR, file)),
+    }))
+    .filter((file) => file.stats.isFile());
 
   // Calculate total size of files in bytes
   const totalSize = files.reduce((acc, file) => acc + file.stats.size, 0);
@@ -123,10 +106,9 @@ async function cleanUpOldImages() {
 
 async function saveImageWithMetadata(
   imageData: Buffer,
-  prompt: string
+  cacheKey: string
 ): Promise<string> {
-  let bgdir = await storage.get("BACKGROUND_DIR");
-  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
+  const BACKGROUND_DIR = await getBackgroundDirectory();
 
   const existingFiles = fs.readdirSync(BACKGROUND_DIR);
   const lastNumber = existingFiles
@@ -140,13 +122,13 @@ async function saveImageWithMetadata(
   const newFileName = `bg${lastNumber + 1}.jpg`;
   const filePath = path.join(BACKGROUND_DIR, newFileName);
 
-  await sharp(imageData).toFile(filePath);
+  await sharp(imageData).jpeg().toFile(filePath);
 
   // Add the prompt as metadata using exiftool
   await exiftool.write(
     filePath,
     {
-      Comment: prompt,
+      Comment: cacheKey,
     },
     { writeArgs: ["-overwrite_original"] }
   );
@@ -218,20 +200,27 @@ async function setDesktopBackgroundMacOs(imagePath: string): Promise<void> {
   });
 }
 
-async function isDuplicate(prompt: string): Promise<string | null> {
-  let bgdir = await storage.get("BACKGROUND_DIR");
-  let BACKGROUND_DIR = bgdir ?? path.join(__dirname, "../backgrounds");
-  const files = fs.readdirSync(BACKGROUND_DIR);
+async function isDuplicate(cacheKey: string): Promise<string | null> {
+  const BACKGROUND_DIR = await getBackgroundDirectory();
+  const files = fs
+    .readdirSync(BACKGROUND_DIR)
+    .filter((file) => file !== cacheFilename);
   let cacheUpdated = false;
 
   for (const file of files) {
     const filePath = path.join(BACKGROUND_DIR, file);
+    const stats = fs.statSync(filePath);
+
+    if (!stats.isFile()) {
+      continue;
+    }
+
     const hash = createHash("md5").update(filePath).digest("hex");
     if (!cacheFiles) cacheFiles = await loadCache();
     const cacheValue = cacheFiles[hash];
 
     if (cacheValue) {
-      if (cacheValue === prompt) {
+      if (cacheValue === cacheKey) {
         if (cacheUpdated) {
           await saveCache();
         }
@@ -239,9 +228,9 @@ async function isDuplicate(prompt: string): Promise<string | null> {
       }
     } else {
       const metadata = await exiftool.read(filePath);
-      cacheFiles[hash] = metadata.Comment;
+      cacheFiles[hash] = String(metadata.Comment ?? "");
       cacheUpdated = true;
-      if (metadata.Comment === prompt) {
+      if (metadata.Comment === cacheKey) {
         if (cacheUpdated) {
           await saveCache();
         }
@@ -260,35 +249,51 @@ async function isDuplicate(prompt: string): Promise<string | null> {
 async function ServiceLoop() {
   const prompt = getRandomPrompt();
   console.log(`Using prompt: ${prompt}`);
-  const cache = await isDuplicate(prompt);
-  if (cache === null) {
-    let modelname = await storage.get("MODEL");
-    const MODEL = modelname || "black-forest-labs/FLUX.1-schnell";
-    const imageData = await generateImage(prompt, MODEL);
-    if (imageData) {
+  const imageGenerationService = await ImageGenerationService.fromSettings();
+  const cacheKey = buildImageCacheKey(
+    imageGenerationService.providerId,
+    imageGenerationService.model,
+    prompt
+  );
+  const cache = await isDuplicate(cacheKey);
+
+  try {
+    if (cache === null) {
+      const image = await imageGenerationService.generateImage({ prompt });
+
       // Clean up old images after saving a new one
       await cleanUpOldImages();
 
-      const imagePath = await saveImageWithMetadata(imageData, prompt);
+      const imagePath = await saveImageWithMetadata(image.imageData, cacheKey);
       await setDesktopBackground(imagePath);
       showNotification(
         "Background changed",
-        `Prompt: "${prompt}"\nModel: "${MODEL}"`
+        `Prompt: "${prompt}"\nProvider: ${image.providerId}\nModel: "${image.model}"`
       );
     } else {
-      showNotification(
-        "Error occured",
-        "Failed to generate or set the desktop background."
-      );
-    }
-  } else {
-    console.log("Duplicate prompt detected. Loading cache");
-    // Clean up old images after saving a new one
-    await cleanUpOldImages();
+      console.log("Duplicate prompt detected. Loading cache");
+      // Clean up old images after saving a new one
+      await cleanUpOldImages();
 
-    await setDesktopBackground(cache);
-    showNotification("Background changed [from cache]", `Prompt: "${prompt}"`);
+      await setDesktopBackground(cache);
+      showNotification("Background changed [from cache]", `Prompt: "${prompt}"`);
+    }
+  } catch (error) {
+    const message = formatErrorMessage(error);
+    console.error(message);
+    showNotification(
+      "Background change failed",
+      message.length > 180 ? `${message.slice(0, 177)}...` : message
+    );
   }
+}
+
+function formatErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
 }
 
 export async function startService(): Promise<void> {

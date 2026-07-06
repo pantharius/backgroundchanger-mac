@@ -1,100 +1,50 @@
-A torchlit hallway twisting in impossible geometry, shadows whispering along the walls, analog photography, gothic realism
-A forgotten chapel filled with broken cultist masks and blood-written prayers, analog photography, dark and hyper-realistic
-A rotting throne room where the King of Shadows once ruled in silence, analog photography, vivid dust and darkness
-An underground crypt with flickering candles revealing false exits, analog photography, unsettling and cinematic
-A cultist ritual mid-interruption, symbols frozen in glowing air, analog photography, gothic suspense
-A cell marked 'TRAITOR' in scratched iron, with notes hidden under the stone, analog photography, cinematic lighting
-A broken statue of a blindfolded god, vines growing from its eyes, analog photography, decayed and rich textures
-An endless staircase where time bends backward, analog photography, eerie mood and cinematic realism
-A moonlit courtyard covered in dry blood and children’s chalk drawings, analog photography, surreal horror
-A flickering torch revealing inscriptions that disappear when stared at, analog photography, gothic tension
-A wall of chained cultist robes, all facing the wrong direction, analog photography, unsettling realism
-A grand mirror chamber that shows another version of the player behind them, analog photography, haunted atmosphere
-An altar where hearts are traded for false prophecies, analog photography, surreal religious horror
-A doorless room full of identical doors, each slightly pulsing, analog photography, confusing realism
-A paper trail written by 'the Prisoner' leading into darkness, analog photography, vintage mystery
-A lantern-lit cavern pulsing with biological veins on its walls, analog photography, rich organic detail
-A shallow pool reflecting a sky that does not exist, analog photography, dreamlike horror
-A cultist's bedroom lined with notebooks repeating 'He is not who he seems', analog photography, subtle terror
-A cursed antechamber flooded with fog and whispers, analog photography, thick atmosphere
-A library where pages rearrange themselves based on who enters, analog photography, magical realism
-A burnt parchment that only reveals text when placed near bones, analog photography, mystical horror
-A stone guardian frozen mid-scream, blocking a bridge of ash, analog photography, cinematic emotion
-A round table where all cultist chairs are turned away from the center, analog photography, surreal setup
-An upside-down hallway whose torches drip upwards, analog photography, gothic and dreamlike
-A tree growing underground, its leaves made of whispers, analog photography, eerie naturalism
-A chamber where torches cast no shadow, analog photography, uncanny atmosphere
-A chained coffin leaking warm light, labeled 'Do not release', analog photography, heavy detail
-A diary page stapled inside a cultist’s cloak, analog photography, subtle story detail
-A cracked bell tower where time stopped mid-toll, analog photography, haunting and dramatic
-A mirror that shows the player bleeding, though they are untouched, analog photography, horror realism
-A torch-lit circle where voices never echo, analog photography, ancient haunted tone
-A shrine where offerings are bones arranged into poems, analog photography, poetic gothic horror
-A waterfall of shadows falling in reverse, analog photography, surreal magic realism
-A maze garden where the hedges whisper confessions, analog photography, unsettling naturalism
-A chapel floor of cracked stained glass, showing scenes not yet happened, analog photography, eerie color detail
-A hallway full of dolls with burned eyes, facing the wall, analog photography, creepy atmosphere
-A jail cell containing only feathers and ash, analog photography, visual mystery
-A pit where torches flicker without fire, analog photography, impossible detail
-A statue of the King of Shadows with a missing face, analog photography, ancient and enigmatic
-A handprint made of salt leading into an open door, analog photography, disturbing subtlety
-A room with walls that hum louder the longer you stay, analog photography, sonic horror
-A bench in a crypt where two shadows sit but no one is present, analog photography, ghostly realism
-A cloaked figure made entirely of falling leaves, analog photography, surreal and beautiful
-An abandoned lantern illuminating unreadable books, analog photography, cinematic shadows
-A sacrifice circle lined with teeth and moss, analog photography, morbid and natural
-A message written in fog on a mirror, slowly fading, analog photography, visual tension
-A tower that repeats itself infinitely upwards, analog photography, recursive visual horror
-A bed of swords under a peaceful tree, analog photography, mythic and unsettling
-A giant eye carved into the floor blinking only when alone, analog photography, creepy realism
-A maze of curtains, some leading to real places, others to madness, analog photography, dream logic
-A wooden puppet bound in chains with a note that reads 'Me', analog photography, surreal story element
-A shrine to the forgotten sun god, buried in black sand, analog photography, rich decay detail
-A drowned room lit only by floating candles, analog photography, submerged and surreal
-A stone tablet speaking with a dead language in moving letters, analog photography, otherworldly realism
-A hallway of keys hanging from the ceiling, none open any door, analog photography, visual frustration
-A cracked hourglass where sand falls upward, analog photography, time-bending realism
-A throne room frozen mid-riot, everyone made of stone, analog photography, haunting detail
-A garden where each flower cries softly, analog photography, creepy and poetic
-A stairway that turns to water halfway down, analog photography, transformation in motion
-A cultist courtroom where no judge ever arrives, analog photography, heavy silence
-A cell door scribbled with the words 'It was me all along', analog photography, betrayal realism
-A black mirror that shows the player aging rapidly, analog photography, temporal horror
-A dungeon bridge made entirely of chained bones, analog photography, visual and disturbing detail
-An archive where all books are filled with eyes, analog photography, unsettling symbolic horror
-A ceiling mural that changes depending on the viewer’s past, analog photography, reactive surrealism
-A door that only appears when you close your eyes, analog photography, visual paradox
-A candlelit tomb for someone yet to die, analog photography, premonition atmosphere
-A rope hanging from nowhere in a foggy crypt, analog photography, moody composition
-A table with four cups, one always full of blood, analog photography, mystery setup
-A hallway lined with paintings that blink, analog photography, uncanny traditional horror
-A mirror that does not reflect the torchlight, analog photography, magical realism
-A shattered window to a night sky with no stars, analog photography, existential visual
-A book that bleeds ink when opened, analog photography, organic detail horror
-A hanged statue in the middle of a garden of smiles, analog photography, dark contrast
-A broken door constantly repairing itself, analog photography, visual loop horror
-A throne of melted candlewax and forgotten vows, analog photography, oozing mood
-A glowing stone that whispers forgotten names, analog photography, audio-visual realism
-A sealed well humming with promises, analog photography, haunted suggestion
-A spinning hallway that never moves, analog photography, paradoxical horror
-A lantern casting shadows with no flame, analog photography, impossible realism
-A map carved into a person's back, analog photography, symbolic gothic horror
-A child’s voice echoing from a locked wooden box, analog photography, suggestive narrative
-A tower that only appears in reflections, analog photography, surreal logic
-An abandoned dinner table set for thirteen, analog photography, implied ritual
-A mirror hallway that distorts memory instead of appearance, analog photography, uncanny horror
-An ancient urn containing fresh breath, analog photography, hyperreal ancient oddity
-A room that erases footprints after five seconds, analog photography, unsettling magical effect
-A gate covered in notes begging it to stay closed, analog photography, implied terror
-A brazier that burns shadows only, analog photography, twisted magical object
-A cultist’s mask that shifts shape based on fear, analog photography, uncanny design
-A bloodstained diary ending in a question mark, analog photography, suspenseful narrative
-A cracked sundial that casts no shadow, analog photography, lost time horror
-A fountain spouting sand instead of water, analog photography, decayed timeless atmosphere
-A cage made from the ribs of something long dead, analog photography, morbid realism
-A sculpture of the King of Shadows made from melted mirrors, analog photography, surreal reflection theme
-An altar where your name is already carved, analog photography, predetermined fate horror
-A silent corridor where all sound is swallowed, analog photography, atmospheric terror
-A hand-shaped torch that only burns for liars, analog photography, mystical symbolism
-A mural showing the exact moment you're in, analog photography, present-time anomaly
-A well that returns objects changed, analog photography, narrative horror setup
+analog photography, a dark fantasy forest at dawn with ancient mossy stones, faint mist, soft birds in the distance, hidden ruins barely visible between trees, cinematic realistic wallpaper, no text, no logo
+analog photography, a lonely medieval road under heavy clouds, wet cobblestones, distant torchlight, a ruined watchtower on the hill, grounded dark fantasy atmosphere, cinematic realistic wallpaper, no text, no logo
+analog photography, a quiet dungeon entrance carved into a mountain, old wooden door, cold fog, scattered adventurer equipment, serious heroic fantasy mood, cinematic realistic wallpaper, no text, no logo
+analog photography, an abandoned fantasy tavern after closing time, dying fireplace, wooden tables, rain on stained glass windows, warm low light, realistic medieval interior wallpaper, no text, no logo
+analog photography, a massive ancient tree growing through forgotten stone ruins, soft green light, tiny glowing insects, calm mysterious Zelda-like fantasy atmosphere, realistic cinematic wallpaper, no text, no logo
+analog photography, a hidden village in a deep valley, medieval rooftops, smoke from chimneys, mountains behind, early morning mist, peaceful Skyrim-like fantasy realism, wallpaper, no text, no logo
+analog photography, a solemn dwarf hall under the mountain, monumental stone pillars, low firelight, carved statues, dark gold accents, serious Tolkien-inspired fantasy realism, wallpaper, no text, no logo
+analog photography, a cursed temple in a dense forest, broken statues, roots crawling over stone, pale moonlight, quiet threatening atmosphere, dark fantasy realistic wallpaper, no text, no logo
+analog photography, a medieval bridge over a black river at night, lanterns reflected in water, fog around the arches, distant castle silhouette, cinematic dark fantasy wallpaper, no text, no logo
+analog photography, a small campfire in a dangerous forest, old map on a log, sword and backpack nearby, no people, quiet adventure mood, realistic fantasy wallpaper, no text, no logo
+analog photography, a ruined castle courtyard after rain, puddles reflecting a grey sky, ivy on stone walls, broken banners, melancholic medieval realism, cinematic wallpaper, no text, no logo
+analog photography, an old wizard study without characters, shelves of books, brass instruments, candlelight, rain outside, grounded magical realism, cozy dark fantasy wallpaper, no text, no logo
+analog photography, a mountain monastery above a sea of clouds, cold stone, prayer flags moving in the wind, sunrise breaking through mist, calm epic fantasy realism, wallpaper, no text, no logo
+analog photography, a forest clearing with a single ancient sword stuck in stone, grass moving softly, pale morning light, subtle heroic fantasy atmosphere, realistic cinematic wallpaper, no text, no logo
+analog photography, a narrow medieval alley at night, wet stones, warm window light, hanging signs without readable text, quiet role playing game atmosphere, realistic wallpaper, no text, no logo
+analog photography, a dark fantasy swamp at twilight, twisted trees, glowing fireflies, shallow black water, old wooden walkway, mysterious realistic game environment wallpaper, no text, no logo
+analog photography, an underground crystal cave with blue reflections, ancient stairs leading down, calm magical lighting, detailed realistic fantasy environment, cinematic wallpaper, no text, no logo
+analog photography, a forgotten battlefield covered in grass and rain, broken shields, old spears, distant mountains, solemn medieval atmosphere, realistic cinematic wallpaper, no text, no logo
+analog photography, a quiet chapel in ruins, moonlight through broken stained glass, dust in the air, overgrown floor, sacred dark fantasy atmosphere, realistic wallpaper, no text, no logo
+analog photography, a heroic fantasy landscape with rolling hills, distant fortress, storm clouds opening to sunlight, wide cinematic composition, realistic wallpaper, no text, no logo
+analog photography, a futuristic dark workspace at night, multiple monitors with abstract blurred interfaces, rain on the window, soft neon reflections, productive calm atmosphere, realistic wallpaper, no text, no logo
+analog photography, a liquid glass abstract macOS-inspired wallpaper, translucent dark shapes, subtle violet and blue reflections, premium modern interface aesthetic, clean realistic render, no text, no logo
+analog photography, a black and gold futuristic dashboard room, soft ambient light, glass panels, minimal interface surfaces without readable text, elegant dark UI atmosphere, realistic wallpaper, no text, no logo
+analog photography, a cyberpunk street after rain, deep blue shadows, muted magenta neon, wet asphalt, steam from vents, no crowds, cinematic realistic wallpaper, no text, no logo
+analog photography, a quiet rooftop above a futuristic city at dawn, glass towers, distant drones, pale orange sky, calm reflective sci-fi mood, realistic wallpaper, no text, no logo
+analog photography, a small hacker apartment at night, cables, mechanical keyboard, soft lamp, city lights through blinds, dark realistic tech atmosphere, wallpaper, no text, no logo
+analog photography, a futuristic train station almost empty, blue lighting, polished black floor, rain outside, quiet liminal cyberpunk mood, realistic cinematic wallpaper, no text, no logo
+analog photography, a cold galactic empire corridor, monumental black metal walls, white light strips, distant hangar door, military space opera atmosphere, realistic wallpaper, no text, no logo
+analog photography, a lonely spaceship observation deck facing a huge planet, soft blue light, minimal dark interior, quiet cosmic atmosphere, realistic sci-fi wallpaper, no text, no logo
+analog photography, a giant mecha sleeping in an industrial hangar, maintenance lights, fog, cables on the floor, dark blue and amber cinematic lighting, realistic sci-fi wallpaper, no text, no logo
+analog photography, an abandoned space colony greenhouse, broken glass, plants reclaiming metal structures, Earth-like sunlight, melancholy sci-fi realism, cinematic wallpaper, no text, no logo
+analog photography, a neon-lit server room with black racks, soft fog, reflections on polished floor, futuristic infrastructure mood, dark realistic wallpaper, no text, no logo
+analog photography, a monumental orbital shipyard above a cloudy planet, tiny maintenance lights, huge silent structures, cold space opera scale, realistic cinematic wallpaper, no text, no logo
+analog photography, a retro-futuristic arcade room with glowing machines, dark carpet, neon reflections, no readable signs, nostalgic but serious atmosphere, realistic wallpaper, no text, no logo
+analog photography, a dark cosmic emperor throne room without characters, deep violet nebula visible through huge windows, black stone, red and blue light, cinematic sci-fi fantasy wallpaper, no text, no logo
+analog photography, a calm lake at sunrise surrounded by pine forest, distant mountains, soft fog on water, birds flying low, peaceful nature wallpaper, realistic cinematic style, no text, no logo
+analog photography, a rainy French street at night, old stone buildings, warm windows, reflections on pavement, quiet melancholic urban mood, realistic wallpaper, no text, no logo
+analog photography, a snowy forest path with a small red fox in the distance, soft falling snow, muted winter light, calm realistic nature wallpaper, no text, no logo
+analog photography, a cliff facing a violent sea under a dramatic sky, waves crashing, wind in grass, cathartic natural atmosphere, realistic cinematic wallpaper, no text, no logo
+analog photography, a quiet old bookshop at night, warm lamps, rain outside, stacked books, wooden shelves, cozy melancholic realism, wallpaper, no text, no logo
+analog photography, a lonely train track through dense forest, morning mist, old wooden sleepers, soft green light, calm mysterious atmosphere, realistic wallpaper, no text, no logo
+analog photography, a small cabin by a frozen lake, warm window glow, snowy mountains, clear starry sky, restful cinematic winter wallpaper, no text, no logo
+analog photography, a sunflower field under a stormy sky with a single beam of sunlight, wind moving the flowers, dramatic but hopeful mood, realistic wallpaper, no text, no logo
+analog photography, a Mediterranean village at blue hour, white walls, narrow stairs, sea in the distance, warm lights, calm realistic wallpaper, no text, no logo
+analog photography, a misty highland landscape with stone ruins, sheep paths, grey clouds, soft green hills, realistic Celtic medieval atmosphere, wallpaper, no text, no logo
+analog photography, a post-apocalyptic city reclaimed by nature, vines on concrete towers, sunlight through broken windows, no people, quiet realistic wallpaper, no text, no logo
+analog photography, an overgrown shopping mall turned into an indoor forest, broken skylight, soft rain, abandoned but peaceful mood, realistic cinematic wallpaper, no text, no logo
+analog photography, a surreal cosmic ocean at night, dark waves reflecting stars, a huge moon low on the horizon, calm dreamlike realism, cinematic wallpaper, no text, no logo
+analog photography, a liminal office corridor at night, dark carpet, soft fluorescent light, rain against windows, slightly unsettling but calm realistic wallpaper, no text, no logo
+analog photography, a mysterious parallel-world forest with impossible stone arches, tiny luminous creatures hidden in moss, ultra detailed nature, realistic cinematic wallpaper, no text, no logo
