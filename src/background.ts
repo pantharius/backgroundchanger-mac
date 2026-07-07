@@ -18,6 +18,13 @@ import {
 const PROMPTS_FILE = path.join(__dirname, "../prompts.txt");
 const PID_FILE = path.join(__dirname, "../background_changer.pid");
 
+type ImageMetadata = {
+  cacheKey: string;
+  prompt: string;
+  providerId: string;
+  model: string;
+};
+
 let currentTask: cron.ScheduledTask | null = null;
 let cacheFiles: Record<string, string> | null = null;
 const cacheFilename = ".cacheFiles.json";
@@ -106,7 +113,7 @@ async function cleanUpOldImages() {
 
 async function saveImageWithMetadata(
   imageData: Buffer,
-  cacheKey: string
+  metadata: ImageMetadata
 ): Promise<string> {
   const BACKGROUND_DIR = await getBackgroundDirectory();
 
@@ -124,11 +131,16 @@ async function saveImageWithMetadata(
 
   await sharp(imageData).jpeg().toFile(filePath);
 
-  // Add the prompt as metadata using exiftool
+  // Keep the prompt visible in image properties while storing the cache key
+  // separately for duplicate detection.
   await exiftool.write(
     filePath,
     {
-      Comment: cacheKey,
+      Comment: metadata.prompt,
+      UserComment: metadata.prompt,
+      ImageDescription: metadata.cacheKey,
+      Artist: metadata.providerId,
+      Model: metadata.model,
     },
     { writeArgs: ["-overwrite_original"] }
   );
@@ -228,9 +240,10 @@ async function isDuplicate(cacheKey: string): Promise<string | null> {
       }
     } else {
       const metadata = await exiftool.read(filePath);
-      cacheFiles[hash] = String(metadata.Comment ?? "");
+      const fileCacheKey = getMetadataCacheKey(metadata);
+      cacheFiles[hash] = fileCacheKey;
       cacheUpdated = true;
-      if (metadata.Comment === cacheKey) {
+      if (fileCacheKey === cacheKey) {
         if (cacheUpdated) {
           await saveCache();
         }
@@ -244,6 +257,23 @@ async function isDuplicate(cacheKey: string): Promise<string | null> {
   }
 
   return null;
+}
+
+function getMetadataCacheKey(metadata: {
+  ImageDescription?: unknown;
+  Comment?: unknown;
+}): string {
+  const imageDescription = String(metadata.ImageDescription ?? "");
+  if (imageDescription.startsWith("{")) {
+    return imageDescription;
+  }
+
+  const comment = String(metadata.Comment ?? "");
+  if (comment.startsWith("{")) {
+    return comment;
+  }
+
+  return "";
 }
 
 async function ServiceLoop() {
@@ -264,7 +294,12 @@ async function ServiceLoop() {
       // Clean up old images after saving a new one
       await cleanUpOldImages();
 
-      const imagePath = await saveImageWithMetadata(image.imageData, cacheKey);
+      const imagePath = await saveImageWithMetadata(image.imageData, {
+        cacheKey,
+        prompt,
+        providerId: image.providerId,
+        model: image.model,
+      });
       await setDesktopBackground(imagePath);
       showNotification(
         "Background changed",
